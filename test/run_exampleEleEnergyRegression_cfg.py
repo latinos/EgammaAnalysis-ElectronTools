@@ -6,7 +6,7 @@ process.load('Configuration.StandardSequences.Geometry_cff')
 process.load('Configuration/StandardSequences/MagneticField_38T_cff')
 process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
 process.load("Configuration.StandardSequences.Reconstruction_cff")
-process.GlobalTag.globaltag = 'START53_V10::All'
+process.GlobalTag.globaltag = 'START44_V7::All'
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
@@ -14,7 +14,7 @@ process.maxEvents = cms.untracked.PSet(
 
 
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('file:../../../PhysicsTools/PatAlgos/test/patTuple_standard.root')
+    fileNames = cms.untracked.vstring('file:../../../PhysicsTools/PatAlgos/test/patTuple.root')
     )
 
 
