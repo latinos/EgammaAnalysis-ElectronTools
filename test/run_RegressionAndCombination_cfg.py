@@ -21,9 +21,8 @@ process.load("EgammaAnalysis.ElectronTools.calibratedPatElectrons_cfi")
 process.calibratedPatElectrons.inputDataset = cms.string("Fall11")
 process.calibratedPatElectrons.isMC = cms.bool(True)
 process.calibratedPatElectrons.updateEnergyError = cms.bool(True)
-process.calibratedPatElectrons.applyCorrections = cms.int32(10)
-process.calibratedPatElectrons.applyCorrections = cms.int32(1)
-process.calibratedPatElectrons.debug = cms.bool(False)
+process.calibratedPatElectrons.applyCorrections = cms.int32(999)
+process.calibratedPatElectrons.debug = cms.bool(True)
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
