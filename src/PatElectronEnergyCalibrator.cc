@@ -280,7 +280,7 @@ void ElectronEnergyCalibrator::computeNewRegEnergy
       }
 	  }
   }
-  if (dataset_=="Summer12_DR53X_HCP2012") { 
+  if (dataset_=="Summer12_DR53X_HCP2012"||dataset_=="2012Jul13ReReco") { 
       if (electron.isEB() && fabs(electron.superCluster()->eta())<1 && r9<0.94) dsigMC = 0.0103;
       if (electron.isEB() && fabs(electron.superCluster()->eta())<1 && r9>=0.94) dsigMC = 0.0090;
       if (electron.isEB() && fabs(electron.superCluster()->eta())>=1 && r9<0.94) dsigMC = 0.0190;
@@ -297,7 +297,7 @@ void ElectronEnergyCalibrator::computeNewRegEnergy
     corrMC = gaussDistribution.fire();
     if (debug_) std::cout << "[ElectronEnergyCalibrator] unsmeared energy " << newEnergy_ << std::endl;
     if (debug_) std::cout << "[ElectronEnergyCalibrator] smearing value " << dsigMC << std::endl;
-    if (debug_) {newEnergy_ = newEnergy_*(1+dsigMC);} else {newEnergy_ = newEnergy_*corrMC; } 
+    newEnergy_ = newEnergy_*corrMC;  
     if (debug_) std::cout << "[ElectronEnergyCalibrator] smeared energy " << newEnergy_ << std::endl;
   }  
   // correct energy error for MC and for data as error is obtained from (ideal) MC parametrisation
@@ -801,7 +801,7 @@ void ElectronEnergyCalibrator::computeNewEnergy
       if (electron.isEE() && fabs(electron.superCluster()->eta())<2 && r9>=0.94) dsigMC = 0.0375;
       if (electron.isEE() && fabs(electron.superCluster()->eta())>=2 && r9<0.94) dsigMC = 0.0602;
       if (electron.isEE() && fabs(electron.superCluster()->eta())>=2 && r9>=0.94) dsigMC = 0.0607;   
-    }  else if (dataset_=="Summer12_DR53X_HCP2012") { 
+    }  else if (dataset_=="Summer12_DR53X_HCP2012"||dataset_=="2012Jul13ReReco") { 
       if (electron.isEB() && fabs(electron.superCluster()->eta())<1 && r9<0.94) dsigMC = 0.0099;
       if (electron.isEB() && fabs(electron.superCluster()->eta())<1 && r9>=0.94) dsigMC = 0.0103;
       if (electron.isEB() && fabs(electron.superCluster()->eta())>=1 && r9<0.94) dsigMC = 0.0219;
@@ -824,7 +824,7 @@ void ElectronEnergyCalibrator::computeNewEnergy
     corrMC = gaussDistribution.fire();
     if (debug_) std::cout << "[ElectronEnergyCalibrator] unsmeared energy " << scEnergy << std::endl;
     if (debug_) std::cout << "[ElectronEnergyCalibrator] smearing value " << dsigMC << std::endl;
-    if (debug_) {newEnergy_ = scEnergy*(1+dsigMC);} else {newEnergy_ = scEnergy*corrMC; } 
+    newEnergy_ = scEnergy*corrMC;  
     if (debug_) std::cout << "[ElectronEnergyCalibrator] smeared energy " << newEnergy_ << std::endl;
   }  
   // correct energy error for MC and for data as error is obtained from (ideal) MC parametrisation
