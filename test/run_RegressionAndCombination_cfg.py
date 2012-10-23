@@ -21,20 +21,22 @@ process.load("EgammaAnalysis.ElectronTools.calibratedPatElectrons_cfi")
 process.calibratedPatElectrons.inputDataset = cms.string("Fall11")
 process.calibratedPatElectrons.isMC = cms.bool(True)
 process.calibratedPatElectrons.updateEnergyError = cms.bool(True)
-process.calibratedPatElectrons.applyCorrections = cms.int32(999)
+process.calibratedPatElectrons.applyCorrections = cms.int32(10)
 process.calibratedPatElectrons.debug = cms.bool(True)
 
+
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(1000)
             )
 
 
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring('file:../../../PhysicsTools/PatAlgos/test/patTuple.root')
+                            fileNames = cms.untracked.vstring('file:/localscratch/b/beaudett/egamma/official/CMSSW_4_4_5/src/PhysicsTools/PatAlgos/test/patTuple.root')
                             )
 
 
 process.load('EgammaAnalysis.ElectronTools.electronRegressionEnergyProducer_cfi')
+process.eleRegressionEnergy.rhoCollection = cms.InputTag('kt6PFJets:rho')
 
 process.out = cms.OutputModule("PoolOutputModule",
                                outputCommands = cms.untracked.vstring('drop *',
