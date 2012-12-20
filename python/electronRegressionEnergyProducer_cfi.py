@@ -13,7 +13,9 @@ eleRegressionEnergy = cms.EDProducer("RegressionEnergyPatElectronProducer",
                                      # actually not needed when use2011Regression is false
                                    regression2011InputFile = cms.string("EgammaAnalysis/ElectronTools/data/eleEnergyReg2011Weights_V1.root"),
                                      # Regression2012
-                                   regressionInputFile = cms.string("EgammaAnalysis/ElectronTools/data/eleEnergyReg2012Weights_V1.root"),  
+                                   regressionInputFile = cms.string("EGamma/EGammaAnalysisTools/data/eleEnergyRegWeights_V1.root"),
+                                     # the file below is identical to the above but stored in an other place
+                                     #regressionInputFile = cms.string("EgammaAnalysis/ElectronTools/data/eleEnergyReg2012Weights_V1.root"),  
                                    energyRegressionType = cms.uint32(1),
                                    rhoCollection = cms.InputTag('kt6PFJets:rho:RECO'),
                                    vertexCollection = cms.InputTag('offlinePrimaryVertices'),  
