@@ -26,13 +26,11 @@
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
-#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EgammaReco/interface/ElectronSeed.h"
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 #include "Geometry/CaloEventSetup/interface/CaloTopologyRecord.h"
 #include "Geometry/Records/interface/CaloGeometryRecord.h"
-
 #include "EgammaAnalysis/ElectronTools/interface/PatElectronEnergyCalibrator.h"
 #include "EgammaAnalysis/ElectronTools/interface/SuperClusterHelper.h"
 
@@ -68,7 +66,8 @@ CalibratedElectronProducer::CalibratedElectronProducer( const edm::ParameterSet 
   isAOD = cfg.getParameter<bool>("isAOD");
   updateEnergyError = cfg.getParameter<bool>("updateEnergyError");
   applyCorrections = cfg.getParameter<int>("applyCorrections");
-  debug = cfg.getParameter<bool>("debug");
+  verbose = cfg.getParameter<bool>("verbose");
+  synchronization = cfg.getParameter<bool>("synchronization");
   
   //basic checks
   if (isMC&&(dataset!="Summer11"&&dataset!="Fall11"&&dataset!="Summer12"&&dataset!="Summer12_DR53X_HCP2012"))
@@ -133,8 +132,7 @@ void CalibratedElectronProducer::produce( edm::Event & event, const edm::EventSe
     electrons->push_back((*oldElectronsH)[iele]);
   }
 
-  ElectronEnergyCalibrator theEnCorrector(dataset, isAOD, isMC, updateEnergyError, applyCorrections, debug);
-
+  ElectronEnergyCalibrator theEnCorrector(dataset, isAOD, isMC, updateEnergyError, applyCorrections, verbose, synchronization);
 
   std::vector<double> regressionValues;
   std::vector<double> regressionErrorValues;
@@ -151,13 +149,12 @@ void CalibratedElectronProducer::produce( edm::Event & event, const edm::EventSe
     regressionValues.push_back(regressionEnergy);
     regressionErrorValues.push_back(regressionEnergyError);
 
-    // r9
+    //    r9 
     const EcalRecHitCollection * recHits=0;
     if(ele.isEB()) {
       recHits = pEBRecHits.product();
     } else
       recHits = pEERecHits.product();
-
 
     SuperClusterHelper mySCHelper(&(ele),recHits,ecalTopology_,caloGeometry_);
 
@@ -169,6 +166,8 @@ void CalibratedElectronProducer::produce( edm::Event & event, const edm::EventSe
         //std::cout << "[CalibratedElectronProducer] is tracker driven only!!" << std::endl;
       }
    }
+
+
   // Save the electrons
   const edm::OrphanHandle<reco::GsfElectronCollection> gsfNewElectronHandle = event.put(electrons, newElectronName_) ;
   energyFiller.insert(gsfNewElectronHandle,regressionValues.begin(),regressionValues.end());

@@ -5,6 +5,8 @@
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/EDProduct.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
+
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
@@ -40,12 +42,14 @@ class CalibratedElectronProducer: public edm::EDProducer
     bool isMC ;
     bool updateEnergyError ;
     int applyCorrections ;
-    bool debug ;
+    bool verbose ;
+    bool synchronization ;
 
     const CaloTopology * ecalTopology_;
     const CaloGeometry * caloGeometry_;
     bool geomInitialized_;
     std::string newElectronName_;
+
  } ;
 
 #endif

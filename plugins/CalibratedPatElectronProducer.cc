@@ -58,12 +58,13 @@ CalibratedPatElectronProducer::CalibratedPatElectronProducer( const edm::Paramet
   isAOD = cfg.getParameter<bool>("isAOD");
   updateEnergyError = cfg.getParameter<bool>("updateEnergyError");
   applyCorrections = cfg.getParameter<int>("applyCorrections");
-  debug = cfg.getParameter<bool>("debug");
+  verbose = cfg.getParameter<bool>("verbose");
+  synchronization = cfg.getParameter<bool>("synchronization");
   
   //basic checks
-  if (isMC&&(dataset!="Summer11"&&dataset!="Fall11"))
+  if (isMC&&(dataset!="Summer11"&&dataset!="Fall11"&&dataset!="Summer12"&&dataset!="Summer12_DR53X_HCP2012"))
    { throw cms::Exception("CalibratedgsfElectronProducer|ConfigError")<<"Unknown MC dataset" ; }
-  if (!isMC&&(dataset!="Prompt"&&dataset!="ReReco"&&dataset!="Jan16ReReco"))
+  if (!isMC&&(dataset!="Prompt"&&dataset!="ReReco"&&dataset!="Jan16ReReco"&&dataset!="ICHEP2012"&&dataset!="2012Jul13ReReco"))
    { throw cms::Exception("CalibratedgsfElectronProducer|ConfigError")<<"Unknown Data dataset" ; }
    cout << "[CalibratedGsfElectronProducer] Correcting scale for dataset " << dataset << endl;
  }
@@ -88,7 +89,7 @@ void CalibratedPatElectronProducer::produce( edm::Event & event, const edm::Even
     electrons->push_back(clone);
   }
 
-  ElectronEnergyCalibrator theEnCorrector(dataset, isAOD, isMC, updateEnergyError, applyCorrections, debug);
+  ElectronEnergyCalibrator theEnCorrector(dataset, isAOD, isMC, updateEnergyError, applyCorrections, verbose, synchronization);
 
   for
    ( ele = electrons->begin() ;
