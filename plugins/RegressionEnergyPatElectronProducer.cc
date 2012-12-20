@@ -30,7 +30,11 @@ RegressionEnergyPatElectronProducer::RegressionEnergyPatElectronProducer( const 
   rhoInputTag_ = cfg.getParameter<edm::InputTag>("rhoCollection");
   verticesInputTag_ = cfg.getParameter<edm::InputTag>("vertexCollection");
   energyRegressionType_ = cfg.getParameter<uint32_t>("energyRegressionType");
-  regressionInputFile_ = cfg.getParameter<std::string>("regressionInputFile");
+  use2011Regression_ = cfg.getParameter<bool>("use2011Regression");
+  if(use2011Regression_) 
+    regression2011InputFile_ = cfg.getParameter<std::string>("regression2011InputFile");
+
+  regression2012InputFile_ = cfg.getParameter<std::string>("regressionInputFile");
   recHitCollectionEB_ = cfg.getParameter<edm::InputTag>("recHitCollectionEB");
   recHitCollectionEE_ = cfg.getParameter<edm::InputTag>("recHitCollectionEE");
   nameEnergyReg_      = cfg.getParameter<std::string>("nameEnergyReg");
@@ -63,8 +67,15 @@ RegressionEnergyPatElectronProducer::RegressionEnergyPatElectronProducer( const 
   else if (energyRegressionType_ == 2) type = ElectronEnergyRegressionEvaluate::kWithTrkVar;
 
   //load weights and initialize
-  regressionEvaluator_ = new ElectronEnergyRegressionEvaluate();
-  regressionEvaluator_->initialize(regressionInputFile_.c_str(),type);
+  regression2011Evaluator_ = 0;
+  regression2012Evaluator_ =0; 
+  if(use2011Regression_) {
+    regression2011Evaluator_ = new ElectronEnergyRegressionEvaluate();
+    regression2011Evaluator_->initialize(regression2011InputFile_.c_str(),type);
+  } else {
+    regression2012Evaluator_ = new ElectronEnergyRegressionEvaluate();
+    regression2012Evaluator_->initialize(regression2012InputFile_.c_str(),type);
+  }
 
   if(produceValueMaps_) {
     produces<edm::ValueMap<double> >(nameEnergyReg_);
@@ -84,14 +95,18 @@ RegressionEnergyPatElectronProducer::RegressionEnergyPatElectronProducer( const 
  
 RegressionEnergyPatElectronProducer::~RegressionEnergyPatElectronProducer()
 {
-  delete regressionEvaluator_;
+  if(regression2011Evaluator_) delete regression2011Evaluator_;
+  if(regression2012Evaluator_) delete regression2012Evaluator_;
 
 }
 
 void RegressionEnergyPatElectronProducer::produce( edm::Event & event, const edm::EventSetup & setup )
 {
-
-  assert(regressionEvaluator_->isInitialized());
+  if(use2011Regression_) 
+    assert(regression2011Evaluator_->isInitialized());
+  else
+    assert(regression2012Evaluator_->isInitialized());
+  
   if (!geomInitialized_) {
     edm::ESHandle<CaloTopology> theCaloTopology;
     setup.get<CaloTopologyRecord>().get(theCaloTopology);
@@ -102,6 +117,8 @@ void RegressionEnergyPatElectronProducer::produce( edm::Event & event, const edm
     caloGeometry_ = & (*theCaloGeometry);
     geomInitialized_ = true;
   }
+
+  regressionEvaluator_ = (use2011Regression_) ? regression2011Evaluator_ : regression2012Evaluator_;
 
 
   //**************************************************************************

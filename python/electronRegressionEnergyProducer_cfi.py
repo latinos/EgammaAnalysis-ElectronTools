@@ -9,7 +9,11 @@ eleRegressionEnergy = cms.EDProducer("RegressionEnergyPatElectronProducer",
                                    useRecHitCollections = cms.bool(False),
                                      # produce ValueMaps. Should be true for GsfElectrons otherwise this producer doest nothing
                                    produceValueMaps = cms.bool(False),
-                                   regressionInputFile = cms.string("EGamma/EGammaAnalysisTools/data/eleEnergyRegWeights_V1.root"),
+                                   use2011Regression = cms.bool(False),  
+                                     # actually not needed when use2011Regression is false
+                                   regression2011InputFile = cms.string("EgammaAnalysis/ElectronTools/data/eleEnergyReg2011Weights_V1.root"),
+                                     # Regression2012
+                                   regressionInputFile = cms.string("EgammaAnalysis/ElectronTools/data/eleEnergyReg2012Weights_V1.root"),  
                                    energyRegressionType = cms.uint32(1),
                                    rhoCollection = cms.InputTag('kt6PFJets:rho:RECO'),
                                    vertexCollection = cms.InputTag('offlinePrimaryVertices'),  

@@ -39,9 +39,14 @@ class RegressionEnergyPatElectronProducer: public edm::EDProducer
   
   uint32_t energyRegressionType_ ;
   uint32_t inputCollectionType_ ;
-  std::string regressionInputFile_;
+  bool use2011Regression_;
+  std::string regression2011InputFile_;
+  std::string regression2012InputFile_;
   bool debug_ ;
+  ElectronEnergyRegressionEvaluate *regression2011Evaluator_;
+  ElectronEnergyRegressionEvaluate *regression2012Evaluator_;
   ElectronEnergyRegressionEvaluate *regressionEvaluator_;
+
   bool geomInitialized_;
   bool producePatElectrons_;
   bool produceValueMaps_;
