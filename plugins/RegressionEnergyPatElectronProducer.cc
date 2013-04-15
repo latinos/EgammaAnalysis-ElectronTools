@@ -22,7 +22,6 @@ using namespace std ;
 using namespace reco ;
 using namespace pat ;
 
-
 RegressionEnergyPatElectronProducer::RegressionEnergyPatElectronProducer( const edm::ParameterSet & cfg )
 {
 
@@ -61,8 +60,7 @@ RegressionEnergyPatElectronProducer::RegressionEnergyPatElectronProducer( const 
   //set regression type
   ElectronEnergyRegressionEvaluate::ElectronEnergyRegressionType type = ElectronEnergyRegressionEvaluate::kNoTrkVar;
   if (energyRegressionType_ == 1) type = ElectronEnergyRegressionEvaluate::kNoTrkVar;
-  else if (energyRegressionType_ == 2) type = ElectronEnergyRegressionEvaluate::kWithSubCluVar;
-  else if (energyRegressionType_ == 3) type = ElectronEnergyRegressionEvaluate::kWithTrkVar;
+  else if (energyRegressionType_ == 2) type = ElectronEnergyRegressionEvaluate::kWithTrkVar;
 
   //load weights and initialize
   regressionEvaluator_ = new ElectronEnergyRegressionEvaluate();
@@ -203,14 +201,15 @@ void RegressionEnergyPatElectronProducer::produce( edm::Event & event, const edm
       mySCHelper = new SuperClusterHelper( &(*patCollectionH)[iele], recHits,ecalTopology_,caloGeometry_);
     }
    
+
+
     // apply regression energy
     Double_t FinalMomentum = 0;
     Double_t FinalMomentumError = 0;
     Double_t RegressionMomentum = 0;
     Double_t RegressionMomentumError = 0;
 
-    if (energyRegressionType_ == 1) {
-
+      if (energyRegressionType_ == 1) {
 	RegressionMomentum = regressionEvaluator_->regressionValueNoTrkVar( mySCHelper->rawEnergy(),
 									    mySCHelper->eta(),
 									    mySCHelper->phi(),
@@ -291,155 +290,7 @@ void RegressionEnergyPatElectronProducer::produce( edm::Event & event, const edm
 	energyErrorValues.push_back(RegressionMomentumError);	
 
 
-    } else if (energyRegressionType_ == 2) {// ECAL regression with subcluster information
-        RegressionMomentum = regressionEvaluator_->regressionValueWithSubClusters( 
-                mySCHelper->rawEnergy(),
-                mySCHelper->eta(),
-                mySCHelper->phi(),
-                mySCHelper->r9(),
-                mySCHelper->etaWidth(),
-                mySCHelper->phiWidth(),
-                mySCHelper->clustersSize(),
-                mySCHelper->hadronicOverEm(),
-                rho, 
-                nvertices, 
-                mySCHelper->seedEta(),
-                mySCHelper->seedPhi(),
-                mySCHelper->seedEnergy(),
-                mySCHelper->e3x3(),
-                mySCHelper->e5x5(),
-                mySCHelper->sigmaIetaIeta(),
-                mySCHelper->spp(),
-                mySCHelper->sep(),
-                mySCHelper->eMax(),
-                mySCHelper->e2nd(),
-                mySCHelper->eTop(),
-                mySCHelper->eBottom(),
-                mySCHelper->eLeft(),
-                mySCHelper->eRight(),
-                mySCHelper->e2x5Max(),
-                mySCHelper->e2x5Top(),
-                mySCHelper->e2x5Bottom(),
-                mySCHelper->e2x5Left(),
-                mySCHelper->e2x5Right(),
-                mySCHelper->ietaSeed(),
-                mySCHelper->iphiSeed(),
-                mySCHelper->etaCrySeed(),
-                mySCHelper->phiCrySeed(),
-                mySCHelper->preshowerEnergyOverRaw(),
-                ele->ecalDrivenSeed(),
-                ele->isEBEtaGap(),
-                ele->isEBPhiGap(),
-                ele->isEEDeeGap(),
-                mySCHelper->eSubClusters(),
-                mySCHelper->subClusterEnergy(1),
-                mySCHelper->subClusterEta(1),
-                mySCHelper->subClusterPhi(1),
-                mySCHelper->subClusterEmax(1),
-                mySCHelper->subClusterE3x3(1),
-                mySCHelper->subClusterEnergy(2),
-                mySCHelper->subClusterEta(2),
-                mySCHelper->subClusterPhi(2),
-                mySCHelper->subClusterEmax(2),
-                mySCHelper->subClusterE3x3(2),
-                mySCHelper->subClusterEnergy(3),
-                mySCHelper->subClusterEta(3),
-                mySCHelper->subClusterPhi(3),
-                mySCHelper->subClusterEmax(3),
-                mySCHelper->subClusterE3x3(3),
-		        mySCHelper->nPreshowerClusters(),
-		        mySCHelper->eESClusters(),
-		        mySCHelper->esClusterEnergy(0),
-		        mySCHelper->esClusterEta(0),
-		        mySCHelper->esClusterPhi(0),
-		        mySCHelper->esClusterEnergy(1),
-		        mySCHelper->esClusterEta(1),
-		        mySCHelper->esClusterPhi(1),
-		        mySCHelper->esClusterEnergy(2),
-		        mySCHelper->esClusterEta(2),
-		        mySCHelper->esClusterPhi(2),
-                ele->isEB(),
-                debug_);
-        RegressionMomentumError = regressionEvaluator_->regressionUncertaintyWithSubClusters( 
-                mySCHelper->rawEnergy(),
-                mySCHelper->eta(),
-                mySCHelper->phi(),
-                mySCHelper->r9(),
-                mySCHelper->etaWidth(),
-                mySCHelper->phiWidth(),
-                mySCHelper->clustersSize(),
-                mySCHelper->hadronicOverEm(),
-                rho, 
-                nvertices, 
-                mySCHelper->seedEta(),
-                mySCHelper->seedPhi(),
-                mySCHelper->seedEnergy(),
-                mySCHelper->e3x3(),
-                mySCHelper->e5x5(),
-                mySCHelper->sigmaIetaIeta(),
-                mySCHelper->spp(),
-                mySCHelper->sep(),
-                mySCHelper->eMax(),
-                mySCHelper->e2nd(),
-                mySCHelper->eTop(),
-                mySCHelper->eBottom(),
-                mySCHelper->eLeft(),
-                mySCHelper->eRight(),
-                mySCHelper->e2x5Max(),
-                mySCHelper->e2x5Top(),
-                mySCHelper->e2x5Bottom(),
-                mySCHelper->e2x5Left(),
-                mySCHelper->e2x5Right(),
-                mySCHelper->ietaSeed(),
-                mySCHelper->iphiSeed(),
-                mySCHelper->etaCrySeed(),
-                mySCHelper->phiCrySeed(),
-                mySCHelper->preshowerEnergyOverRaw(),
-                ele->ecalDrivenSeed(),
-                ele->isEBEtaGap(),
-                ele->isEBPhiGap(),
-                ele->isEEDeeGap(),
-                mySCHelper->eSubClusters(),
-                mySCHelper->subClusterEnergy(1),
-                mySCHelper->subClusterEta(1),
-                mySCHelper->subClusterPhi(1),
-                mySCHelper->subClusterEmax(1),
-                mySCHelper->subClusterE3x3(1),
-                mySCHelper->subClusterEnergy(2),
-                mySCHelper->subClusterEta(2),
-                mySCHelper->subClusterPhi(2),
-                mySCHelper->subClusterEmax(2),
-                mySCHelper->subClusterE3x3(2),
-                mySCHelper->subClusterEnergy(3),
-                mySCHelper->subClusterEta(3),
-                mySCHelper->subClusterPhi(3),
-                mySCHelper->subClusterEmax(3),
-                mySCHelper->subClusterE3x3(3),
-		        mySCHelper->nPreshowerClusters(),
-		        mySCHelper->eESClusters(),
-		        mySCHelper->esClusterEnergy(0),
-		        mySCHelper->esClusterEta(0),
-		        mySCHelper->esClusterPhi(0),
-		        mySCHelper->esClusterEnergy(1),
-		        mySCHelper->esClusterEta(1),
-		        mySCHelper->esClusterPhi(1),
-		        mySCHelper->esClusterEnergy(2),
-		        mySCHelper->esClusterEta(2),
-		        mySCHelper->esClusterPhi(2),
-                ele->isEB(),
-                debug_);
-
-        // PAT method
-        if(inputCollectionType_ == 1) {
-            myPatElectron->setEcalRegressionEnergy(RegressionMomentum, RegressionMomentumError); 
-        }
-        energyValues.push_back(RegressionMomentum);
-        energyErrorValues.push_back(RegressionMomentumError);	
-
-
-    }
-      
-      else if (energyRegressionType_ == 3) {
+      } else if (energyRegressionType_ == 2) {
 	RegressionMomentum = regressionEvaluator_->regressionValueWithTrkVar(ele->p(),
 									    mySCHelper->rawEnergy(),
 									    mySCHelper->eta(),
