@@ -46,14 +46,14 @@ void ElectronEnergyRegressionEvaluate::initialize(std::string weightsFile,
   // Updating type and marking as initialized
   fVersionType = type;
   fIsInitialized = kTRUE;
+
 }
 
 
 
 #ifndef STANDALONE
 double ElectronEnergyRegressionEvaluate::calculateRegressionEnergy(const reco::GsfElectron *ele, 
-                                                                   EcalClusterLazyTools &myEcalCluster, 
-                                                                   const edm::EventSetup &setup,
+                                                                   SuperClusterHelper& mySCHelper, 
                                                                    double rho, double nvertices, 
                                                                    bool printDebug) {
   
@@ -62,35 +62,6 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergy(const reco::G
     return 0;
   }
 
-  std::vector<float> vCov = myEcalCluster.localCovariances(*(ele->superCluster()->seed()));
-  double spp = 0;
-  if (!isnan(vCov[2])) spp = sqrt (vCov[2]);
-  double sep;
-  if (ele->sigmaIetaIeta()*spp > 0) {
-    sep = vCov[1] / (ele->sigmaIetaIeta()*spp);
-  } else if (vCov[1] > 0) {
-    sep = 1.0;
-  } else {
-    sep = -1.0;
-  }
-
-  //local coordinates
-  EcalClusterLocal local;  
-  double ietaseed = 0;
-  double iphiseed = 0;
-  double etacryseed = 0;
-  double phicryseed = 0;
-
-  if (ele->superCluster()->seed()->hitsAndFractions().at(0).first.subdetId()==EcalBarrel) {
-    float etacry, phicry, thetatilt, phitilt;
-    int ieta, iphi;
-    local.localCoordsEB(*ele->superCluster()->seed(),setup,etacry,phicry,ieta,iphi,thetatilt,phitilt);
-    
-    ietaseed = ieta;
-    iphiseed = iphi;
-    etacryseed = etacry;
-    phicryseed = phicry;
-  }
   
   if (printDebug) {
     std::cout << "Regression Type: " << fVersionType << std::endl;
@@ -98,184 +69,255 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergy(const reco::G
   }
 
   if (fVersionType == kNoTrkVar) {
-    return regressionValueNoTrkVar(
-                                   ele->superCluster()->rawEnergy(),
-                                   ele->superCluster()->eta(),
-                                   ele->superCluster()->phi(),
-                                   myEcalCluster.e3x3(*ele->superCluster()->seed()) / ele->superCluster()->rawEnergy(),
-                                   ele->superCluster()->etaWidth(),
-                                   ele->superCluster()->phiWidth(),
-                                   ele->superCluster()->clustersSize(),
-                                   ele->hadronicOverEm(),
-                                   rho,
-                                   nvertices,
-                                   ele->superCluster()->seed()->eta(),
-                                   ele->superCluster()->seed()->phi(),
-                                   ele->superCluster()->seed()->energy(),
-                                   myEcalCluster.e3x3(*ele->superCluster()->seed()),
-                                   myEcalCluster.e5x5(*ele->superCluster()->seed()),
-                                   ele->sigmaIetaIeta(),
-                                   spp,
-                                   sep,
-                                   myEcalCluster.eMax(*ele->superCluster()->seed()),
-                                   myEcalCluster.e2nd(*ele->superCluster()->seed()),
-                                   myEcalCluster.eTop(*ele->superCluster()->seed()),
-                                   myEcalCluster.eBottom(*ele->superCluster()->seed()),
-                                   myEcalCluster.eLeft(*ele->superCluster()->seed()),
-                                   myEcalCluster.eRight(*ele->superCluster()->seed()),
-                                   myEcalCluster.e2x5Max(*ele->superCluster()->seed()),
-                                   myEcalCluster.e2x5Top(*ele->superCluster()->seed()),
-                                   myEcalCluster.e2x5Bottom(*ele->superCluster()->seed()),
-                                   myEcalCluster.e2x5Left(*ele->superCluster()->seed()),
-                                   myEcalCluster.e2x5Right(*ele->superCluster()->seed()),
-                                   ietaseed,
-                                   iphiseed,
-                                   etacryseed,
-                                   phicryseed,
-                                   ele->superCluster()->preshowerEnergy() / ele->superCluster()->rawEnergy(),
-                                   printDebug
-                                   );
+      return regressionValueNoTrkVar(
+              mySCHelper.rawEnergy(),
+              mySCHelper.eta(),
+              mySCHelper.phi(),
+              mySCHelper.r9(),
+              mySCHelper.etaWidth(),
+              mySCHelper.phiWidth(),
+              mySCHelper.clustersSize(),
+              mySCHelper.hadronicOverEm(),
+              rho, 
+              nvertices, 
+              mySCHelper.seedEta(),
+              mySCHelper.seedPhi(),
+              mySCHelper.seedEnergy(),
+              mySCHelper.e3x3(),
+              mySCHelper.e5x5(),
+              mySCHelper.sigmaIetaIeta(),
+              mySCHelper.spp(),
+              mySCHelper.sep(),
+              mySCHelper.eMax(),
+              mySCHelper.e2nd(),
+              mySCHelper.eTop(),
+              mySCHelper.eBottom(),
+              mySCHelper.eLeft(),
+              mySCHelper.eRight(),
+              mySCHelper.e2x5Max(),
+              mySCHelper.e2x5Top(),
+              mySCHelper.e2x5Bottom(),
+              mySCHelper.e2x5Left(),
+              mySCHelper.e2x5Right(),
+              mySCHelper.ietaSeed(),
+              mySCHelper.iphiSeed(),
+              mySCHelper.etaCrySeed(),
+              mySCHelper.phiCrySeed(),
+              mySCHelper.preshowerEnergyOverRaw(),
+              printDebug
+                  );
   } 
+  if (fVersionType == kWithSubCluVar) {
+      return regressionValueWithSubClusters(
+              mySCHelper.rawEnergy(),
+              mySCHelper.eta(),
+              mySCHelper.phi(),
+              mySCHelper.r9(),
+              mySCHelper.etaWidth(),
+              mySCHelper.phiWidth(),
+              mySCHelper.clustersSize(),
+              mySCHelper.hadronicOverEm(),
+              rho, 
+              nvertices, 
+              mySCHelper.seedEta(),
+              mySCHelper.seedPhi(),
+              mySCHelper.seedEnergy(),
+              mySCHelper.e3x3(),
+              mySCHelper.e5x5(),
+              mySCHelper.sigmaIetaIeta(),
+              mySCHelper.spp(),
+              mySCHelper.sep(),
+              mySCHelper.eMax(),
+              mySCHelper.e2nd(),
+              mySCHelper.eTop(),
+              mySCHelper.eBottom(),
+              mySCHelper.eLeft(),
+              mySCHelper.eRight(),
+              mySCHelper.e2x5Max(),
+              mySCHelper.e2x5Top(),
+              mySCHelper.e2x5Bottom(),
+              mySCHelper.e2x5Left(),
+              mySCHelper.e2x5Right(),
+              mySCHelper.ietaSeed(),
+              mySCHelper.iphiSeed(),
+              mySCHelper.etaCrySeed(),
+              mySCHelper.phiCrySeed(),
+              mySCHelper.preshowerEnergyOverRaw(),
+              ele->ecalDrivenSeed(),
+              ele->isEBEtaGap(),
+              ele->isEBPhiGap(),
+              ele->isEEDeeGap(),
+              mySCHelper.eSubClusters(),
+              mySCHelper.subClusterEnergy(1),
+              mySCHelper.subClusterEta(1),
+              mySCHelper.subClusterPhi(1),
+              mySCHelper.subClusterEmax(1),
+              mySCHelper.subClusterE3x3(1),
+              mySCHelper.subClusterEnergy(2),
+              mySCHelper.subClusterEta(2),
+              mySCHelper.subClusterPhi(2),
+              mySCHelper.subClusterEmax(2),
+              mySCHelper.subClusterE3x3(2),
+              mySCHelper.subClusterEnergy(3),
+              mySCHelper.subClusterEta(3),
+              mySCHelper.subClusterPhi(3),
+              mySCHelper.subClusterEmax(3),
+              mySCHelper.subClusterE3x3(3),
+              mySCHelper.nPreshowerClusters(),
+              mySCHelper.eESClusters(),
+              mySCHelper.esClusterEnergy(0),
+              mySCHelper.esClusterEta(0),
+              mySCHelper.esClusterPhi(0),
+              mySCHelper.esClusterEnergy(1),
+              mySCHelper.esClusterEta(1),
+              mySCHelper.esClusterPhi(1),
+              mySCHelper.esClusterEnergy(2),
+              mySCHelper.esClusterEta(2),
+              mySCHelper.esClusterPhi(2),
+              ele->isEB(),
+              printDebug
+                  );
+  }
   else if (fVersionType == kNoTrkVarV1) {
-    return regressionValueNoTrkVarV1(
-                                   ele->superCluster()->rawEnergy(),
-                                   ele->superCluster()->eta(),
-                                   ele->superCluster()->phi(),
-                                   myEcalCluster.e3x3(*ele->superCluster()->seed()) / ele->superCluster()->rawEnergy(),
-                                   ele->superCluster()->etaWidth(),
-                                   ele->superCluster()->phiWidth(),
-                                   ele->superCluster()->clustersSize(),
-                                   ele->hadronicOverEm(),
-                                   rho,
-                                   nvertices,
-                                   ele->superCluster()->seed()->eta(),
-                                   ele->superCluster()->seed()->phi(),
-                                   ele->superCluster()->seed()->energy(),
-                                   myEcalCluster.e3x3(*ele->superCluster()->seed()),
-                                   myEcalCluster.e5x5(*ele->superCluster()->seed()),
-                                   ele->sigmaIetaIeta(),
-                                   spp,
-                                   sep,
-                                   myEcalCluster.eMax(*ele->superCluster()->seed()),
-                                   myEcalCluster.e2nd(*ele->superCluster()->seed()),
-                                   myEcalCluster.eTop(*ele->superCluster()->seed()),
-                                   myEcalCluster.eBottom(*ele->superCluster()->seed()),
-                                   myEcalCluster.eLeft(*ele->superCluster()->seed()),
-                                   myEcalCluster.eRight(*ele->superCluster()->seed()),
-                                   myEcalCluster.e2x5Max(*ele->superCluster()->seed()),
-                                   myEcalCluster.e2x5Top(*ele->superCluster()->seed()),
-                                   myEcalCluster.e2x5Bottom(*ele->superCluster()->seed()),
-                                   myEcalCluster.e2x5Left(*ele->superCluster()->seed()),
-                                   myEcalCluster.e2x5Right(*ele->superCluster()->seed()),
-                                   ietaseed,
-                                   iphiseed,
-                                   etacryseed,
-                                   phicryseed,
-                                   ele->superCluster()->preshowerEnergy() / ele->superCluster()->rawEnergy(),
-                                   ele->ecalDrivenSeed(),
-                                   printDebug
-                                   );
+      return regressionValueNoTrkVarV1(
+              mySCHelper.rawEnergy(),
+              mySCHelper.eta(),
+              mySCHelper.phi(),
+              mySCHelper.r9(),
+              mySCHelper.etaWidth(),
+              mySCHelper.phiWidth(),
+              mySCHelper.clustersSize(),
+              mySCHelper.hadronicOverEm(),
+              rho, 
+              nvertices, 
+              mySCHelper.seedEta(),
+              mySCHelper.seedPhi(),
+              mySCHelper.seedEnergy(),
+              mySCHelper.e3x3(),
+              mySCHelper.e5x5(),
+              mySCHelper.sigmaIetaIeta(),
+              mySCHelper.spp(),
+              mySCHelper.sep(),
+              mySCHelper.eMax(),
+              mySCHelper.e2nd(),
+              mySCHelper.eTop(),
+              mySCHelper.eBottom(),
+              mySCHelper.eLeft(),
+              mySCHelper.eRight(),
+              mySCHelper.e2x5Max(),
+              mySCHelper.e2x5Top(),
+              mySCHelper.e2x5Bottom(),
+              mySCHelper.e2x5Left(),
+              mySCHelper.e2x5Right(),
+              mySCHelper.ietaSeed(),
+              mySCHelper.iphiSeed(),
+              mySCHelper.etaCrySeed(),
+              mySCHelper.phiCrySeed(),
+              mySCHelper.preshowerEnergyOverRaw(),
+              ele->ecalDrivenSeed(),
+              printDebug
+                  );
   } 
   else if (fVersionType == kWithTrkVarV1) {
-    return regressionValueWithTrkVarV1(
-                                     ele->superCluster()->rawEnergy(),
-                                     ele->superCluster()->eta(),
-                                     ele->superCluster()->phi(),
-                                     myEcalCluster.e3x3(*ele->superCluster()->seed()) / ele->superCluster()->rawEnergy(),
-                                     ele->superCluster()->etaWidth(),
-                                     ele->superCluster()->phiWidth(),
-                                     ele->superCluster()->clustersSize(),
-                                     ele->hadronicOverEm(),
-                                     rho,
-                                     nvertices,
-                                     ele->superCluster()->seed()->eta(),
-                                     ele->superCluster()->seed()->phi(),
-                                     ele->superCluster()->seed()->energy(),
-                                     myEcalCluster.e3x3(*ele->superCluster()->seed()),
-                                     myEcalCluster.e5x5(*ele->superCluster()->seed()),
-                                     ele->sigmaIetaIeta(),
-                                     spp,
-                                     sep,
-                                     myEcalCluster.eMax(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2nd(*ele->superCluster()->seed()),
-                                     myEcalCluster.eTop(*ele->superCluster()->seed()),
-                                     myEcalCluster.eBottom(*ele->superCluster()->seed()),
-                                     myEcalCluster.eLeft(*ele->superCluster()->seed()),
-                                     myEcalCluster.eRight(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Max(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Top(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Bottom(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Left(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Right(*ele->superCluster()->seed()),
-                                     ietaseed,
-                                     iphiseed,
-                                     etacryseed,
-                                     phicryseed,
-                                     ele->superCluster()->preshowerEnergy() / ele->superCluster()->rawEnergy(),
-                                     ele->ecalDrivenSeed(),
-                                     ele->trackMomentumAtVtx().R(),
-                                     fmax(ele->fbrem(),-1.0),
-                                     ele->charge(),
-                                     fmin(ele->eSuperClusterOverP(), 20.0),
-                                     ele->trackMomentumError(),
-                                     ele->ecalEnergyError(),
-                                     ele->classification(),                                    
-                                     printDebug
-                                     );
+      return regressionValueWithTrkVarV1(
+              mySCHelper.rawEnergy(),
+              mySCHelper.eta(),
+              mySCHelper.phi(),
+              mySCHelper.r9(),
+              mySCHelper.etaWidth(),
+              mySCHelper.phiWidth(),
+              mySCHelper.clustersSize(),
+              mySCHelper.hadronicOverEm(),
+              rho, 
+              nvertices, 
+              mySCHelper.seedEta(),
+              mySCHelper.seedPhi(),
+              mySCHelper.seedEnergy(),
+              mySCHelper.e3x3(),
+              mySCHelper.e5x5(),
+              mySCHelper.sigmaIetaIeta(),
+              mySCHelper.spp(),
+              mySCHelper.sep(),
+              mySCHelper.eMax(),
+              mySCHelper.e2nd(),
+              mySCHelper.eTop(),
+              mySCHelper.eBottom(),
+              mySCHelper.eLeft(),
+              mySCHelper.eRight(),
+              mySCHelper.e2x5Max(),
+              mySCHelper.e2x5Top(),
+              mySCHelper.e2x5Bottom(),
+              mySCHelper.e2x5Left(),
+              mySCHelper.e2x5Right(),
+              mySCHelper.ietaSeed(),
+              mySCHelper.iphiSeed(),
+              mySCHelper.etaCrySeed(),
+              mySCHelper.phiCrySeed(),
+              mySCHelper.preshowerEnergyOverRaw(),
+              ele->ecalDrivenSeed(),
+              ele->trackMomentumAtVtx().R(),
+              fmax(ele->fbrem(),-1.0),
+              ele->charge(),
+              fmin(ele->eSuperClusterOverP(), 20.0),
+              ele->trackMomentumError(),
+              ele->ecalEnergyError(),
+              ele->classification(),                                    
+              printDebug
+                  );
   } 
   else if (fVersionType == kWithTrkVarV2) {
-    return regressionValueWithTrkVarV2(
-                                     ele->superCluster()->rawEnergy(),
-                                     ele->superCluster()->eta(),
-                                     ele->superCluster()->phi(),
-                                     myEcalCluster.e3x3(*ele->superCluster()->seed()) / ele->superCluster()->rawEnergy(),
-                                     ele->superCluster()->etaWidth(),
-                                     ele->superCluster()->phiWidth(),
-                                     ele->superCluster()->clustersSize(),
-                                     ele->hadronicOverEm(),
-                                     rho,
-                                     nvertices,
-                                     ele->superCluster()->seed()->eta(),
-                                     ele->superCluster()->seed()->phi(),
-                                     ele->superCluster()->seed()->energy(),
-                                     myEcalCluster.e3x3(*ele->superCluster()->seed()),
-                                     myEcalCluster.e5x5(*ele->superCluster()->seed()),
-                                     ele->sigmaIetaIeta(),
-                                     spp,
-                                     sep,
-                                     myEcalCluster.eMax(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2nd(*ele->superCluster()->seed()),
-                                     myEcalCluster.eTop(*ele->superCluster()->seed()),
-                                     myEcalCluster.eBottom(*ele->superCluster()->seed()),
-                                     myEcalCluster.eLeft(*ele->superCluster()->seed()),
-                                     myEcalCluster.eRight(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Max(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Top(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Bottom(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Left(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Right(*ele->superCluster()->seed()),
-                                     ietaseed,
-                                     iphiseed,
-                                     etacryseed,
-                                     phicryseed,
-                                     ele->superCluster()->preshowerEnergy() / ele->superCluster()->rawEnergy(),
-                                     ele->ecalDrivenSeed(),
-                                     ele->trackMomentumAtVtx().R(),
-                                     fmax(ele->fbrem(),-1.0),
-                                     ele->charge(),
-                                     fmin(ele->eSuperClusterOverP(), 20.0),
-                                     ele->trackMomentumError(),
-                                     ele->ecalEnergyError(),
-                                     ele->classification(),     
-                                     fmin(fabs(ele->deltaEtaSuperClusterTrackAtVtx()), 0.6),
-                                     ele->deltaPhiSuperClusterTrackAtVtx(),
-                                     ele->deltaEtaSeedClusterTrackAtCalo(),
-                                     ele->deltaPhiSeedClusterTrackAtCalo(),
-                                     ele->gsfTrack()->chi2() / ele->gsfTrack()->ndof(),
-                                     (ele->closestCtfTrackRef().isNonnull() ? ele->closestCtfTrackRef()->hitPattern().trackerLayersWithMeasurement() : -1), 
-                                     fmin(ele->eEleClusterOverPout(),20.0),
-                                     printDebug
-                                     );
+      return regressionValueWithTrkVarV2(
+              mySCHelper.rawEnergy(),
+              mySCHelper.eta(),
+              mySCHelper.phi(),
+              mySCHelper.r9(),
+              mySCHelper.etaWidth(),
+              mySCHelper.phiWidth(),
+              mySCHelper.clustersSize(),
+              mySCHelper.hadronicOverEm(),
+              rho, 
+              nvertices, 
+              mySCHelper.seedEta(),
+              mySCHelper.seedPhi(),
+              mySCHelper.seedEnergy(),
+              mySCHelper.e3x3(),
+              mySCHelper.e5x5(),
+              mySCHelper.sigmaIetaIeta(),
+              mySCHelper.spp(),
+              mySCHelper.sep(),
+              mySCHelper.eMax(),
+              mySCHelper.e2nd(),
+              mySCHelper.eTop(),
+              mySCHelper.eBottom(),
+              mySCHelper.eLeft(),
+              mySCHelper.eRight(),
+              mySCHelper.e2x5Max(),
+              mySCHelper.e2x5Top(),
+              mySCHelper.e2x5Bottom(),
+              mySCHelper.e2x5Left(),
+              mySCHelper.e2x5Right(),
+              mySCHelper.ietaSeed(),
+              mySCHelper.iphiSeed(),
+              mySCHelper.etaCrySeed(),
+              mySCHelper.phiCrySeed(),
+              mySCHelper.preshowerEnergyOverRaw(),
+              ele->ecalDrivenSeed(),
+              ele->trackMomentumAtVtx().R(),
+              fmax(ele->fbrem(),-1.0),
+              ele->charge(),
+              fmin(ele->eSuperClusterOverP(), 20.0),
+              ele->trackMomentumError(),
+              ele->ecalEnergyError(),
+              ele->classification(),     
+              fmin(fabs(ele->deltaEtaSuperClusterTrackAtVtx()), 0.6),
+              ele->deltaPhiSuperClusterTrackAtVtx(),
+              ele->deltaEtaSeedClusterTrackAtCalo(),
+              ele->deltaPhiSeedClusterTrackAtCalo(),
+              ele->gsfTrack()->chi2() / ele->gsfTrack()->ndof(),
+              (ele->closestCtfTrackRef().isNonnull() ? ele->closestCtfTrackRef()->hitPattern().trackerLayersWithMeasurement() : -1), 
+              fmin(ele->eEleClusterOverPout(),20.0),
+              printDebug
+                  );
   } 
   else {
     std::cout << "Warning: Electron Regression Type " << fVersionType << " is not supported. Reverting to default electron momentum.\n"; 
@@ -286,45 +328,15 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergy(const reco::G
 }
 
 double ElectronEnergyRegressionEvaluate::calculateRegressionEnergyUncertainty(const reco::GsfElectron *ele, 
-                                                                              EcalClusterLazyTools &myEcalCluster, 
-                                                                              const edm::EventSetup &setup,
-                                                                              double rho, double nvertices, 
-                                                                              bool printDebug) {
+        SuperClusterHelper& mySCHelper,
+        double rho, double nvertices, 
+        bool printDebug) {
   
   if (!fIsInitialized) {
     std::cout << "Error: Electron Energy Regression has not been initialized yet. return 0. \n";
     return 0;
   }
 
-  std::vector<float> vCov = myEcalCluster.localCovariances(*(ele->superCluster()->seed()));
-  double spp = 0;
-  if (!isnan(vCov[2])) spp = sqrt (vCov[2]);
-  double sep;
-  if (ele->sigmaIetaIeta()*spp > 0) {
-    sep = vCov[1] / ele->sigmaIetaIeta()*spp;
-  } else if (vCov[1] > 0) {
-    sep = 1.0;
-  } else {
-    sep = -1.0;
-  }
-
-  //local coordinates
-  EcalClusterLocal local;  
-  double ietaseed = 0;
-  double iphiseed = 0;
-  double etacryseed = 0;
-  double phicryseed = 0;
-
-  if (ele->superCluster()->seed()->hitsAndFractions().at(0).first.subdetId()==EcalBarrel) {
-    float etacry, phicry, thetatilt, phitilt;
-    int ieta, iphi;
-    local.localCoordsEB(*ele->superCluster()->seed(),setup,etacry,phicry,ieta,iphi,thetatilt,phitilt);
-    
-    ietaseed = ieta;
-    iphiseed = iphi;
-    etacryseed = etacry;
-    phicryseed = phicry;
-  }
   
   if (printDebug) {
     std::cout << "Regression Type: " << fVersionType << std::endl;
@@ -332,184 +344,255 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergyUncertainty(co
   }
 
   if (fVersionType == kNoTrkVar) {
-    return regressionUncertaintyNoTrkVar(
-                                         ele->superCluster()->rawEnergy(),
-                                         ele->superCluster()->eta(),
-                                         ele->superCluster()->phi(),
-                                         myEcalCluster.e3x3(*ele->superCluster()->seed()) / ele->superCluster()->rawEnergy(),
-                                         ele->superCluster()->etaWidth(),
-                                         ele->superCluster()->phiWidth(),
-                                         ele->superCluster()->clustersSize(),
-                                         ele->hadronicOverEm(),
-                                         rho,
-                                         nvertices,
-                                         ele->superCluster()->seed()->eta(),
-                                         ele->superCluster()->seed()->phi(),
-                                         ele->superCluster()->seed()->energy(),
-                                         myEcalCluster.e3x3(*ele->superCluster()->seed()),
-                                         myEcalCluster.e5x5(*ele->superCluster()->seed()),
-                                         ele->sigmaIetaIeta(),
-                                         spp,
-                                         sep,
-                                         myEcalCluster.eMax(*ele->superCluster()->seed()),
-                                         myEcalCluster.e2nd(*ele->superCluster()->seed()),
-                                         myEcalCluster.eTop(*ele->superCluster()->seed()),
-                                         myEcalCluster.eBottom(*ele->superCluster()->seed()),
-                                         myEcalCluster.eLeft(*ele->superCluster()->seed()),
-                                         myEcalCluster.eRight(*ele->superCluster()->seed()),
-                                         myEcalCluster.e2x5Max(*ele->superCluster()->seed()),
-                                         myEcalCluster.e2x5Top(*ele->superCluster()->seed()),
-                                         myEcalCluster.e2x5Bottom(*ele->superCluster()->seed()),
-                                         myEcalCluster.e2x5Left(*ele->superCluster()->seed()),
-                                         myEcalCluster.e2x5Right(*ele->superCluster()->seed()),
-                                         ietaseed,
-                                         iphiseed,
-                                         etacryseed,
-                                         phicryseed,
-                                         ele->superCluster()->preshowerEnergy() / ele->superCluster()->rawEnergy(),
-                                         printDebug
-                                         );
+      return regressionUncertaintyNoTrkVar(
+              mySCHelper.rawEnergy(),
+              mySCHelper.eta(),
+              mySCHelper.phi(),
+              mySCHelper.r9(),
+              mySCHelper.etaWidth(),
+              mySCHelper.phiWidth(),
+              mySCHelper.clustersSize(),
+              mySCHelper.hadronicOverEm(),
+              rho, 
+              nvertices, 
+              mySCHelper.seedEta(),
+              mySCHelper.seedPhi(),
+              mySCHelper.seedEnergy(),
+              mySCHelper.e3x3(),
+              mySCHelper.e5x5(),
+              mySCHelper.sigmaIetaIeta(),
+              mySCHelper.spp(),
+              mySCHelper.sep(),
+              mySCHelper.eMax(),
+              mySCHelper.e2nd(),
+              mySCHelper.eTop(),
+              mySCHelper.eBottom(),
+              mySCHelper.eLeft(),
+              mySCHelper.eRight(),
+              mySCHelper.e2x5Max(),
+              mySCHelper.e2x5Top(),
+              mySCHelper.e2x5Bottom(),
+              mySCHelper.e2x5Left(),
+              mySCHelper.e2x5Right(),
+              mySCHelper.ietaSeed(),
+              mySCHelper.iphiSeed(),
+              mySCHelper.etaCrySeed(),
+              mySCHelper.phiCrySeed(),
+              mySCHelper.preshowerEnergyOverRaw(),
+              printDebug
+                  );
   } 
+  if (fVersionType == kWithSubCluVar) {
+      return regressionUncertaintyWithSubClusters(
+              mySCHelper.rawEnergy(),
+              mySCHelper.eta(),
+              mySCHelper.phi(),
+              mySCHelper.r9(),
+              mySCHelper.etaWidth(),
+              mySCHelper.phiWidth(),
+              mySCHelper.clustersSize(),
+              mySCHelper.hadronicOverEm(),
+              rho, 
+              nvertices, 
+              mySCHelper.seedEta(),
+              mySCHelper.seedPhi(),
+              mySCHelper.seedEnergy(),
+              mySCHelper.e3x3(),
+              mySCHelper.e5x5(),
+              mySCHelper.sigmaIetaIeta(),
+              mySCHelper.spp(),
+              mySCHelper.sep(),
+              mySCHelper.eMax(),
+              mySCHelper.e2nd(),
+              mySCHelper.eTop(),
+              mySCHelper.eBottom(),
+              mySCHelper.eLeft(),
+              mySCHelper.eRight(),
+              mySCHelper.e2x5Max(),
+              mySCHelper.e2x5Top(),
+              mySCHelper.e2x5Bottom(),
+              mySCHelper.e2x5Left(),
+              mySCHelper.e2x5Right(),
+              mySCHelper.ietaSeed(),
+              mySCHelper.iphiSeed(),
+              mySCHelper.etaCrySeed(),
+              mySCHelper.phiCrySeed(),
+              mySCHelper.preshowerEnergyOverRaw(),
+              ele->ecalDrivenSeed(),
+              ele->isEBEtaGap(),
+              ele->isEBPhiGap(),
+              ele->isEEDeeGap(),
+              mySCHelper.eSubClusters(),
+              mySCHelper.subClusterEnergy(1),
+              mySCHelper.subClusterEta(1),
+              mySCHelper.subClusterPhi(1),
+              mySCHelper.subClusterEmax(1),
+              mySCHelper.subClusterE3x3(1),
+              mySCHelper.subClusterEnergy(2),
+              mySCHelper.subClusterEta(2),
+              mySCHelper.subClusterPhi(2),
+              mySCHelper.subClusterEmax(2),
+              mySCHelper.subClusterE3x3(2),
+              mySCHelper.subClusterEnergy(3),
+              mySCHelper.subClusterEta(3),
+              mySCHelper.subClusterPhi(3),
+              mySCHelper.subClusterEmax(3),
+              mySCHelper.subClusterE3x3(3),
+              mySCHelper.nPreshowerClusters(),
+              mySCHelper.eESClusters(),
+              mySCHelper.esClusterEnergy(0),
+              mySCHelper.esClusterEta(0),
+              mySCHelper.esClusterPhi(0),
+              mySCHelper.esClusterEnergy(1),
+              mySCHelper.esClusterEta(1),
+              mySCHelper.esClusterPhi(1),
+              mySCHelper.esClusterEnergy(2),
+              mySCHelper.esClusterEta(2),
+              mySCHelper.esClusterPhi(2),
+              ele->isEB(),
+              printDebug
+                  );
+  }
   else if (fVersionType == kNoTrkVarV1) {
-    return regressionUncertaintyNoTrkVarV1(
-                                         ele->superCluster()->rawEnergy(),
-                                         ele->superCluster()->eta(),
-                                         ele->superCluster()->phi(),
-                                         myEcalCluster.e3x3(*ele->superCluster()->seed()) / ele->superCluster()->rawEnergy(),
-                                         ele->superCluster()->etaWidth(),
-                                         ele->superCluster()->phiWidth(),
-                                         ele->superCluster()->clustersSize(),
-                                         ele->hadronicOverEm(),
-                                         rho,
-                                         nvertices,
-                                         ele->superCluster()->seed()->eta(),
-                                         ele->superCluster()->seed()->phi(),
-                                         ele->superCluster()->seed()->energy(),
-                                         myEcalCluster.e3x3(*ele->superCluster()->seed()),
-                                         myEcalCluster.e5x5(*ele->superCluster()->seed()),
-                                         ele->sigmaIetaIeta(),
-                                         spp,
-                                         sep,
-                                         myEcalCluster.eMax(*ele->superCluster()->seed()),
-                                         myEcalCluster.e2nd(*ele->superCluster()->seed()),
-                                         myEcalCluster.eTop(*ele->superCluster()->seed()),
-                                         myEcalCluster.eBottom(*ele->superCluster()->seed()),
-                                         myEcalCluster.eLeft(*ele->superCluster()->seed()),
-                                         myEcalCluster.eRight(*ele->superCluster()->seed()),
-                                         myEcalCluster.e2x5Max(*ele->superCluster()->seed()),
-                                         myEcalCluster.e2x5Top(*ele->superCluster()->seed()),
-                                         myEcalCluster.e2x5Bottom(*ele->superCluster()->seed()),
-                                         myEcalCluster.e2x5Left(*ele->superCluster()->seed()),
-                                         myEcalCluster.e2x5Right(*ele->superCluster()->seed()),
-                                         ietaseed,
-                                         iphiseed,
-                                         etacryseed,
-                                         phicryseed,
-                                         ele->superCluster()->preshowerEnergy() / ele->superCluster()->rawEnergy(),
-                                         ele->ecalDrivenSeed(),
-                                         printDebug
-                                         );
+      return regressionUncertaintyNoTrkVarV1(
+              mySCHelper.rawEnergy(),
+              mySCHelper.eta(),
+              mySCHelper.phi(),
+              mySCHelper.r9(),
+              mySCHelper.etaWidth(),
+              mySCHelper.phiWidth(),
+              mySCHelper.clustersSize(),
+              mySCHelper.hadronicOverEm(),
+              rho, 
+              nvertices, 
+              mySCHelper.seedEta(),
+              mySCHelper.seedPhi(),
+              mySCHelper.seedEnergy(),
+              mySCHelper.e3x3(),
+              mySCHelper.e5x5(),
+              mySCHelper.sigmaIetaIeta(),
+              mySCHelper.spp(),
+              mySCHelper.sep(),
+              mySCHelper.eMax(),
+              mySCHelper.e2nd(),
+              mySCHelper.eTop(),
+              mySCHelper.eBottom(),
+              mySCHelper.eLeft(),
+              mySCHelper.eRight(),
+              mySCHelper.e2x5Max(),
+              mySCHelper.e2x5Top(),
+              mySCHelper.e2x5Bottom(),
+              mySCHelper.e2x5Left(),
+              mySCHelper.e2x5Right(),
+              mySCHelper.ietaSeed(),
+              mySCHelper.iphiSeed(),
+              mySCHelper.etaCrySeed(),
+              mySCHelper.phiCrySeed(),
+              mySCHelper.preshowerEnergyOverRaw(),
+              ele->ecalDrivenSeed(),
+              printDebug
+                  );
   } 
   else if (fVersionType == kWithTrkVarV1) {
-    return regressionUncertaintyWithTrkVarV1(
-                                     ele->superCluster()->rawEnergy(),
-                                     ele->superCluster()->eta(),
-                                     ele->superCluster()->phi(),
-                                     myEcalCluster.e3x3(*ele->superCluster()->seed()) / ele->superCluster()->rawEnergy(),
-                                     ele->superCluster()->etaWidth(),
-                                     ele->superCluster()->phiWidth(),
-                                     ele->superCluster()->clustersSize(),
-                                     ele->hadronicOverEm(),
-                                     rho,
-                                     nvertices,
-                                     ele->superCluster()->seed()->eta(),
-                                     ele->superCluster()->seed()->phi(),
-                                     ele->superCluster()->seed()->energy(),
-                                     myEcalCluster.e3x3(*ele->superCluster()->seed()),
-                                     myEcalCluster.e5x5(*ele->superCluster()->seed()),
-                                     ele->sigmaIetaIeta(),
-                                     spp,
-                                     sep,
-                                     myEcalCluster.eMax(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2nd(*ele->superCluster()->seed()),
-                                     myEcalCluster.eTop(*ele->superCluster()->seed()),
-                                     myEcalCluster.eBottom(*ele->superCluster()->seed()),
-                                     myEcalCluster.eLeft(*ele->superCluster()->seed()),
-                                     myEcalCluster.eRight(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Max(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Top(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Bottom(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Left(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Right(*ele->superCluster()->seed()),
-                                     ietaseed,
-                                     iphiseed,
-                                     etacryseed,
-                                     phicryseed,
-                                     ele->superCluster()->preshowerEnergy() / ele->superCluster()->rawEnergy(),
-                                     ele->ecalDrivenSeed(),
-                                     ele->trackMomentumAtVtx().R(),
-                                     fmax(ele->fbrem(),-1.0),
-                                     ele->charge(),
-                                     fmin(ele->eSuperClusterOverP(), 20.0),
-                                     ele->trackMomentumError(),
-                                     ele->ecalEnergyError(),
-                                     ele->classification(),                                    
-                                     printDebug
-                                     );
-  }  
+      return regressionUncertaintyWithTrkVarV1(
+              mySCHelper.rawEnergy(),
+              mySCHelper.eta(),
+              mySCHelper.phi(),
+              mySCHelper.r9(),
+              mySCHelper.etaWidth(),
+              mySCHelper.phiWidth(),
+              mySCHelper.clustersSize(),
+              mySCHelper.hadronicOverEm(),
+              rho, 
+              nvertices, 
+              mySCHelper.seedEta(),
+              mySCHelper.seedPhi(),
+              mySCHelper.seedEnergy(),
+              mySCHelper.e3x3(),
+              mySCHelper.e5x5(),
+              mySCHelper.sigmaIetaIeta(),
+              mySCHelper.spp(),
+              mySCHelper.sep(),
+              mySCHelper.eMax(),
+              mySCHelper.e2nd(),
+              mySCHelper.eTop(),
+              mySCHelper.eBottom(),
+              mySCHelper.eLeft(),
+              mySCHelper.eRight(),
+              mySCHelper.e2x5Max(),
+              mySCHelper.e2x5Top(),
+              mySCHelper.e2x5Bottom(),
+              mySCHelper.e2x5Left(),
+              mySCHelper.e2x5Right(),
+              mySCHelper.ietaSeed(),
+              mySCHelper.iphiSeed(),
+              mySCHelper.etaCrySeed(),
+              mySCHelper.phiCrySeed(),
+              mySCHelper.preshowerEnergyOverRaw(),
+              ele->ecalDrivenSeed(),
+              ele->trackMomentumAtVtx().R(),
+              fmax(ele->fbrem(),-1.0),
+              ele->charge(),
+              fmin(ele->eSuperClusterOverP(), 20.0),
+              ele->trackMomentumError(),
+              ele->ecalEnergyError(),
+              ele->classification(),                                    
+              printDebug
+                  );
+  } 
   else if (fVersionType == kWithTrkVarV2) {
-    return regressionUncertaintyWithTrkVarV2(
-                                     ele->superCluster()->rawEnergy(),
-                                     ele->superCluster()->eta(),
-                                     ele->superCluster()->phi(),
-                                     myEcalCluster.e3x3(*ele->superCluster()->seed()) / ele->superCluster()->rawEnergy(),
-                                     ele->superCluster()->etaWidth(),
-                                     ele->superCluster()->phiWidth(),
-                                     ele->superCluster()->clustersSize(),
-                                     ele->hadronicOverEm(),
-                                     rho,
-                                     nvertices,
-                                     ele->superCluster()->seed()->eta(),
-                                     ele->superCluster()->seed()->phi(),
-                                     ele->superCluster()->seed()->energy(),
-                                     myEcalCluster.e3x3(*ele->superCluster()->seed()),
-                                     myEcalCluster.e5x5(*ele->superCluster()->seed()),
-                                     ele->sigmaIetaIeta(),
-                                     spp,
-                                     sep,
-                                     myEcalCluster.eMax(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2nd(*ele->superCluster()->seed()),
-                                     myEcalCluster.eTop(*ele->superCluster()->seed()),
-                                     myEcalCluster.eBottom(*ele->superCluster()->seed()),
-                                     myEcalCluster.eLeft(*ele->superCluster()->seed()),
-                                     myEcalCluster.eRight(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Max(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Top(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Bottom(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Left(*ele->superCluster()->seed()),
-                                     myEcalCluster.e2x5Right(*ele->superCluster()->seed()),
-                                     ietaseed,
-                                     iphiseed,
-                                     etacryseed,
-                                     phicryseed,
-                                     ele->superCluster()->preshowerEnergy() / ele->superCluster()->rawEnergy(),
-                                     ele->ecalDrivenSeed(),
-                                     ele->trackMomentumAtVtx().R(),
-                                     fmax(ele->fbrem(),-1.0),
-                                     ele->charge(),
-                                     fmin(ele->eSuperClusterOverP(), 20.0),
-                                     ele->trackMomentumError(),
-                                     ele->ecalEnergyError(),
-                                     ele->classification(),     
-                                     fmin(fabs(ele->deltaEtaSuperClusterTrackAtVtx()), 0.6),
-                                     ele->deltaPhiSuperClusterTrackAtVtx(),
-                                     ele->deltaEtaSeedClusterTrackAtCalo(),
-                                     ele->deltaPhiSeedClusterTrackAtCalo(),
-                                     ele->gsfTrack()->chi2() / ele->gsfTrack()->ndof(),
-                                     (ele->closestCtfTrackRef().isNonnull() ? ele->closestCtfTrackRef()->hitPattern().trackerLayersWithMeasurement() : -1), 
-                                     fmin(ele->eEleClusterOverPout(),20.0),
-                                     printDebug
-                                     );
+      return regressionUncertaintyWithTrkVarV2(
+              mySCHelper.rawEnergy(),
+              mySCHelper.eta(),
+              mySCHelper.phi(),
+              mySCHelper.r9(),
+              mySCHelper.etaWidth(),
+              mySCHelper.phiWidth(),
+              mySCHelper.clustersSize(),
+              mySCHelper.hadronicOverEm(),
+              rho, 
+              nvertices, 
+              mySCHelper.seedEta(),
+              mySCHelper.seedPhi(),
+              mySCHelper.seedEnergy(),
+              mySCHelper.e3x3(),
+              mySCHelper.e5x5(),
+              mySCHelper.sigmaIetaIeta(),
+              mySCHelper.spp(),
+              mySCHelper.sep(),
+              mySCHelper.eMax(),
+              mySCHelper.e2nd(),
+              mySCHelper.eTop(),
+              mySCHelper.eBottom(),
+              mySCHelper.eLeft(),
+              mySCHelper.eRight(),
+              mySCHelper.e2x5Max(),
+              mySCHelper.e2x5Top(),
+              mySCHelper.e2x5Bottom(),
+              mySCHelper.e2x5Left(),
+              mySCHelper.e2x5Right(),
+              mySCHelper.ietaSeed(),
+              mySCHelper.iphiSeed(),
+              mySCHelper.etaCrySeed(),
+              mySCHelper.phiCrySeed(),
+              mySCHelper.preshowerEnergyOverRaw(),
+              ele->ecalDrivenSeed(),
+              ele->trackMomentumAtVtx().R(),
+              fmax(ele->fbrem(),-1.0),
+              ele->charge(),
+              fmin(ele->eSuperClusterOverP(), 20.0),
+              ele->trackMomentumError(),
+              ele->ecalEnergyError(),
+              ele->classification(),     
+              fmin(fabs(ele->deltaEtaSuperClusterTrackAtVtx()), 0.6),
+              ele->deltaPhiSuperClusterTrackAtVtx(),
+              ele->deltaEtaSeedClusterTrackAtCalo(),
+              ele->deltaPhiSeedClusterTrackAtCalo(),
+              ele->gsfTrack()->chi2() / ele->gsfTrack()->ndof(),
+              (ele->closestCtfTrackRef().isNonnull() ? ele->closestCtfTrackRef()->hitPattern().trackerLayersWithMeasurement() : -1), 
+              fmin(ele->eEleClusterOverPout(),20.0),
+              printDebug
+                  );
   }
   else {
     std::cout << "Warning: Electron Regression Type " << fVersionType << " is not supported. Reverting to default electron momentum.\n"; 
@@ -567,6 +650,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
     std::cout << "Error: Regression VersionType " << fVersionType << " is not supported to use function regressionValueNoTrkVar.\n";
     return 0;
   }
+    assert(forestCorrection_ee);
 
   // Now applying regression according to version and (endcap/barrel)
   float *vals = (fabs(scEta) <= 1.479) ? new float[38] : new float[31];
@@ -605,7 +689,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
     vals[31] = IPhiSeed;
     vals[32] = ((int) IEtaSeed)%5;
     vals[33] = ((int) IPhiSeed)%2;
-    vals[34] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
+    vals[34] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
     vals[35] = ((int) IPhiSeed)%20;
     vals[36] = EtaCrySeed;
     vals[37] = PhiCrySeed;
@@ -768,7 +852,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyNoTrkVar(
     vals[31] = IPhiSeed;
     vals[32] = ((int) IEtaSeed)%5;
     vals[33] = ((int) IPhiSeed)%2;
-    vals[34] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
+    vals[34] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
     vals[35] = ((int) IPhiSeed)%20;
     vals[36] = EtaCrySeed;
     vals[37] = PhiCrySeed;
@@ -936,7 +1020,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVarV1(
     vals[32] = IPhiSeed;
     vals[33] = ((int) IEtaSeed)%5;
     vals[34] = ((int) IPhiSeed)%2;
-    vals[35] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
+    vals[35] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
     vals[36] = ((int) IPhiSeed)%20;
     vals[37] = EtaCrySeed;
     vals[38] = PhiCrySeed;
@@ -1102,7 +1186,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyNoTrkVarV1(
     vals[32] = IPhiSeed;
     vals[33] = ((int) IEtaSeed)%5;
     vals[34] = ((int) IPhiSeed)%2;
-    vals[35] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
+    vals[35] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
     vals[36] = ((int) IPhiSeed)%20;
     vals[37] = EtaCrySeed;
     vals[38] = PhiCrySeed;
@@ -1277,7 +1361,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
     vals[36] = IPhiSeed;
     vals[37] = ((int) IEtaSeed)%5;
     vals[38] = ((int) IPhiSeed)%2;
-    vals[39] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
+    vals[39] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
     vals[40] = ((int) IPhiSeed)%20;
     vals[41] = EtaCrySeed;
     vals[42] = PhiCrySeed;
@@ -1450,7 +1534,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVar(
     vals[36] = IPhiSeed;
     vals[37] = ((int) IEtaSeed)%5;
     vals[38] = ((int) IPhiSeed)%2;
-    vals[39] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
+    vals[39] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
     vals[40] = ((int) IPhiSeed)%20;
     vals[41] = EtaCrySeed;
     vals[42] = PhiCrySeed;
@@ -1626,7 +1710,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVarV1(
     vals[39] = IPhiSeed;
     vals[40] = ((int) IEtaSeed)%5;
     vals[41] = ((int) IPhiSeed)%2;
-    vals[42] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
+    vals[42] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
     vals[43] = ((int) IPhiSeed)%20;
     vals[44] = EtaCrySeed;
     vals[45] = PhiCrySeed;
@@ -1805,7 +1889,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVarV1(
     vals[39] = IPhiSeed;
     vals[40] = ((int) IEtaSeed)%5;
     vals[41] = ((int) IPhiSeed)%2;
-    vals[42] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
+    vals[42] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
     vals[43] = ((int) IPhiSeed)%20;
     vals[44] = EtaCrySeed;
     vals[45] = PhiCrySeed;
@@ -1989,7 +2073,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVarV1(std::vector
     vals[39] = IPhiSeed;
     vals[40] = ((int) IEtaSeed)%5;
     vals[41] = ((int) IPhiSeed)%2;
-    vals[42] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
+    vals[42] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
     vals[43] = ((int) IPhiSeed)%20;
     vals[44] = EtaCrySeed;
     vals[45] = PhiCrySeed;
@@ -2173,7 +2257,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVarV1(std::
     vals[39] = IPhiSeed;
     vals[40] = ((int) IEtaSeed)%5;
     vals[41] = ((int) IPhiSeed)%2;
-    vals[42] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
+    vals[42] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
     vals[43] = ((int) IPhiSeed)%20;
     vals[44] = EtaCrySeed;
     vals[45] = PhiCrySeed;
@@ -2365,7 +2449,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVarV2(
     vals[46] = IPhiSeed;
     vals[47] = ((int) IEtaSeed)%5;
     vals[48] = ((int) IPhiSeed)%2;
-    vals[49] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
+    vals[49] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
     vals[50] = ((int) IPhiSeed)%20;
     vals[51] = EtaCrySeed;
     vals[52] = PhiCrySeed;
@@ -2565,7 +2649,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVarV2(
     vals[46] = IPhiSeed;
     vals[47] = ((int) IEtaSeed)%5;
     vals[48] = ((int) IPhiSeed)%2;
-    vals[49] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
+    vals[49] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
     vals[50] = ((int) IPhiSeed)%20;
     vals[51] = EtaCrySeed;
     vals[52] = PhiCrySeed;
@@ -2769,7 +2853,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVarV2(std::vector
     vals[46] = IPhiSeed;
     vals[47] = ((int) IEtaSeed)%5;
     vals[48] = ((int) IPhiSeed)%2;
-    vals[49] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
+    vals[49] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
     vals[50] = ((int) IPhiSeed)%20;
     vals[51] = EtaCrySeed;
     vals[52] = PhiCrySeed;
@@ -2973,7 +3057,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVarV2(std::
     vals[46] = IPhiSeed;
     vals[47] = ((int) IEtaSeed)%5;
     vals[48] = ((int) IPhiSeed)%2;
-    vals[49] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
+    vals[49] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
     vals[50] = ((int) IPhiSeed)%20;
     vals[51] = EtaCrySeed;
     vals[52] = PhiCrySeed;
@@ -3052,6 +3136,515 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVarV2(std::
     std::cout << "regression energy uncertainty = " << regressionResult << std::endl;
   }
 
+
+  // Cleaning up and returning
+  delete[] vals;
+  return regressionResult;
+}
+
+double ElectronEnergyRegressionEvaluate::regressionValueWithSubClusters(
+                                                                 double SCRawEnergy,
+                                                                 double scEta,
+                                                                 double scPhi,
+                                                                 double R9,
+                                                                 double etawidth,
+                                                                 double phiwidth,
+                                                                 double NClusters,
+                                                                 double HoE,
+                                                                 double rho,
+                                                                 double vertices,
+                                                                 double EtaSeed,
+                                                                 double PhiSeed,
+                                                                 double ESeed,
+                                                                 double E3x3Seed,
+                                                                 double E5x5Seed,
+                                                                 double see,
+                                                                 double spp,
+                                                                 double sep,
+                                                                 double EMaxSeed,
+                                                                 double E2ndSeed,
+                                                                 double ETopSeed,
+                                                                 double EBottomSeed,
+                                                                 double ELeftSeed,
+                                                                 double ERightSeed,
+                                                                 double E2x5MaxSeed,
+                                                                 double E2x5TopSeed,
+                                                                 double E2x5BottomSeed,
+                                                                 double E2x5LeftSeed,
+                                                                 double E2x5RightSeed,
+                                                                 double IEtaSeed,
+                                                                 double IPhiSeed,
+                                                                 double EtaCrySeed,
+                                                                 double PhiCrySeed,
+                                                                 double PreShowerOverRaw, 
+                                                                 double isEcalDriven,
+                                                                 double isEtaGap,
+                                                                 double isPhiGap,
+                                                                 double isDeeGap, 
+                                                                 double ESubs,
+                                                                 double ESub1,
+                                                                 double EtaSub1,
+                                                                 double PhiSub1,
+                                                                 double EMaxSub1,
+                                                                 double E3x3Sub1,
+                                                                 double ESub2,
+                                                                 double EtaSub2,
+                                                                 double PhiSub2,
+                                                                 double EMaxSub2,
+                                                                 double E3x3Sub2,
+                                                                 double ESub3,
+                                                                 double EtaSub3,
+                                                                 double PhiSub3,
+                                                                 double EMaxSub3,
+                                                                 double E3x3Sub3,
+                                                                 double NPshwClusters,
+                                                                 double EPshwSubs,
+                                                                 double EPshwSub1,
+                                                                 double EtaPshwSub1,
+                                                                 double PhiPshwSub1,
+                                                                 double EPshwSub2,
+                                                                 double EtaPshwSub2,
+                                                                 double PhiPshwSub2,
+                                                                 double EPshwSub3,
+                                                                 double EtaPshwSub3,
+                                                                 double PhiPshwSub3,
+                                                                 bool isEB,
+                                                                 bool   printDebug) 
+{
+
+    // Checking if instance has been initialized
+    if (fIsInitialized == kFALSE) {
+        printf("ElectronEnergyRegressionEvaluate instance not initialized !!!");
+        return 0;
+    }
+
+    // Checking if type is correct
+    if (!(fVersionType == kWithSubCluVar)) {
+        std::cout << "Error: Regression VersionType " << fVersionType << " is not supported to use function regressionValueWithSubClusters.\n";
+        return 0;
+    }
+
+
+
+  // Now applying regression according to version and (endcap/barrel)
+  float *vals = (isEB) ? new float[61] : new float[65];
+  if (isEB) {		// Barrel
+    vals[0]  = rho;
+    vals[1] = vertices;
+    vals[2] = isEcalDriven;
+    vals[3] = isEtaGap;
+    vals[4] = isPhiGap;
+    vals[5] = isDeeGap;
+    vals[6]  = SCRawEnergy;
+    vals[7]  = scEta;
+    vals[8]  = scPhi;
+    vals[9]  = R9;
+    vals[10]  = etawidth;
+    vals[11]  = phiwidth;
+    vals[12]  = NClusters;
+    vals[13]  = HoE;
+    vals[14] = EtaSeed - scEta;
+    vals[15] = atan2(sin(PhiSeed-scPhi),cos(PhiSeed-scPhi));
+    vals[16] = ESeed/SCRawEnergy;
+    vals[17] = E3x3Seed/ESeed;
+    vals[18]  = E5x5Seed/SCRawEnergy;
+    vals[19] = E5x5Seed/ESeed;
+    vals[20] = EMaxSeed/ESeed;
+    vals[21] = E2ndSeed/ESeed;
+    vals[22] = ETopSeed/ESeed;
+    vals[23] = EBottomSeed/ESeed;
+    vals[24] = ELeftSeed/ESeed;
+    vals[25] = ERightSeed/ESeed;
+    vals[26] = E2x5MaxSeed/ESeed;
+    vals[27] = E2x5TopSeed/ESeed;
+    vals[28] = E2x5BottomSeed/ESeed;
+    vals[29] = E2x5LeftSeed/ESeed;
+    vals[30] = E2x5RightSeed/ESeed;
+    vals[31] = see;
+    vals[32] = spp;
+    vals[33] = sep;
+    vals[34] = phiwidth/etawidth;
+    vals[35] = (ELeftSeed+ERightSeed==0. ? 0. : (ELeftSeed-ERightSeed)/(ELeftSeed+ERightSeed));
+    vals[36] = (ETopSeed+EBottomSeed==0. ? 0. : (ETopSeed-EBottomSeed)/(ETopSeed+EBottomSeed));
+    vals[37] = ESubs/SCRawEnergy;
+    vals[38] = ESub1/SCRawEnergy;
+    vals[39] = (NClusters<=1 ? 999. : EtaSub1-EtaSeed);
+    vals[40] = (NClusters<=1 ? 999. : atan2(sin(PhiSub1-PhiSeed),cos(PhiSub1-PhiSeed)));
+    vals[41] = (NClusters<=1 ? 0.   : EMaxSub1/ESub1);
+    vals[42] = (NClusters<=1 ? 0.   : E3x3Sub1/ESub1);
+    vals[43] = ESub2/SCRawEnergy;
+    vals[44] = (NClusters<=2 ? 999. : EtaSub2-EtaSeed);
+    vals[45] = (NClusters<=2 ? 999. : atan2(sin(PhiSub2-PhiSeed),cos(PhiSub2-PhiSeed)));
+    vals[46] = (NClusters<=2 ? 0.   : EMaxSub2/ESub2);
+    vals[47] = (NClusters<=2 ? 0.   : E3x3Sub2/ESub2);
+    vals[48] = ESub3/SCRawEnergy;
+    vals[49] = (NClusters<=3 ? 999. : EtaSub3-EtaSeed);
+    vals[50] = (NClusters<=3 ? 999. : atan2(sin(PhiSub3-PhiSeed),cos(PhiSub3-PhiSeed)));
+    vals[51] = (NClusters<=3 ? 0.   : EMaxSub3/ESub3);
+    vals[52] = (NClusters<=3 ? 0.   : E3x3Sub3/ESub3);
+    vals[53] = IEtaSeed;
+    vals[54] = ((int) IEtaSeed)%5;
+    vals[55] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
+    vals[56] = IPhiSeed;
+    vals[57] = ((int) IPhiSeed)%2;
+    vals[58] = ((int) IPhiSeed)%20;
+    vals[59] = EtaCrySeed;
+    vals[60] = PhiCrySeed;
+  }
+  else {	// Endcap
+    vals[0]  = rho;
+    vals[1] = vertices;
+    vals[2] = isEcalDriven;
+    vals[3] = isEtaGap;
+    vals[4] = isPhiGap;
+    vals[5] = isDeeGap;
+    vals[6]  = SCRawEnergy;
+    vals[7]  = scEta;
+    vals[8]  = scPhi;
+    vals[9]  = R9;
+    vals[10]  = etawidth;
+    vals[11]  = phiwidth;
+    vals[12]  = NClusters;
+    vals[13]  = HoE;
+    vals[14] = EtaSeed - scEta;
+    vals[15] = atan2(sin(PhiSeed-scPhi),cos(PhiSeed-scPhi));
+    vals[16] = ESeed/SCRawEnergy;
+    vals[17] = E3x3Seed/ESeed;
+    vals[18]  = E5x5Seed/SCRawEnergy;
+    vals[19] = E5x5Seed/ESeed;
+    vals[20] = EMaxSeed/ESeed;
+    vals[21] = E2ndSeed/ESeed;
+    vals[22] = ETopSeed/ESeed;
+    vals[23] = EBottomSeed/ESeed;
+    vals[24] = ELeftSeed/ESeed;
+    vals[25] = ERightSeed/ESeed;
+    vals[26] = E2x5MaxSeed/ESeed;
+    vals[27] = E2x5TopSeed/ESeed;
+    vals[28] = E2x5BottomSeed/ESeed;
+    vals[29] = E2x5LeftSeed/ESeed;
+    vals[30] = E2x5RightSeed/ESeed;
+    vals[31] = see;
+    vals[32] = spp;
+    vals[33] = sep;
+    vals[34] = phiwidth/etawidth;
+    vals[35] = (ELeftSeed+ERightSeed==0. ? 0. : (ELeftSeed-ERightSeed)/(ELeftSeed+ERightSeed));
+    vals[36] = (ETopSeed+EBottomSeed==0. ? 0. : (ETopSeed-EBottomSeed)/(ETopSeed+EBottomSeed));
+    vals[37] = ESubs/SCRawEnergy;
+    vals[38] = ESub1/SCRawEnergy;
+    vals[39] = (NClusters<=1 ? 999. : EtaSub1-EtaSeed);
+    vals[40] = (NClusters<=1 ? 999. : atan2(sin(PhiSub1-PhiSeed),cos(PhiSub1-PhiSeed)));
+    vals[41] = (NClusters<=1 ? 0.   : EMaxSub1/ESub1);
+    vals[42] = (NClusters<=1 ? 0.   : E3x3Sub1/ESub1);
+    vals[43] = ESub2/SCRawEnergy;
+    vals[44] = (NClusters<=2 ? 999. : EtaSub2-EtaSeed);
+    vals[45] = (NClusters<=2 ? 999. : atan2(sin(PhiSub2-PhiSeed),cos(PhiSub2-PhiSeed)));
+    vals[46] = (NClusters<=2 ? 0.   : EMaxSub2/ESub2);
+    vals[47] = (NClusters<=2 ? 0.   : E3x3Sub2/ESub2);
+    vals[48] = ESub3/SCRawEnergy;
+    vals[49] = (NClusters<=3 ? 999. : EtaSub3-EtaSeed);
+    vals[50] = (NClusters<=3 ? 999. : atan2(sin(PhiSub3-PhiSeed),cos(PhiSub3-PhiSeed)));
+    vals[51] = (NClusters<=3 ? 0.   : EMaxSub3/ESub3);
+    vals[52] = (NClusters<=3 ? 0.   : E3x3Sub3/ESub3);
+    vals[53] = PreShowerOverRaw;
+    vals[54] = NPshwClusters;
+    vals[55] = EPshwSubs/SCRawEnergy;
+    vals[56] = EPshwSub1/SCRawEnergy;
+    vals[57] = (NPshwClusters==0 ? 999. : EtaPshwSub1-EtaSeed);
+    vals[58] = (NPshwClusters==0 ? 999. : atan2(sin(PhiPshwSub1-PhiSeed),cos(PhiPshwSub1-PhiSeed)));
+    vals[59] = EPshwSub2/SCRawEnergy;
+    vals[60] = (NPshwClusters<=1 ? 999. : EtaPshwSub2-EtaSeed);
+    vals[61] = (NPshwClusters<=1 ? 999. : atan2(sin(PhiPshwSub2-PhiSeed),cos(PhiPshwSub2-PhiSeed)));
+    vals[62] = EPshwSub3/SCRawEnergy;
+    vals[63] = (NPshwClusters<=2 ? 999. : EtaPshwSub3-EtaSeed);
+    vals[64] = (NPshwClusters<=2 ? 999. : atan2(sin(PhiPshwSub3-PhiSeed),cos(PhiPshwSub3-PhiSeed)));
+
+  }
+
+  // Now evaluating the regression
+  double regressionResult = 0;
+  Int_t BinIndex = -1;
+
+  if (fVersionType == kWithSubCluVar) {
+    if (isEB) { 
+      regressionResult = SCRawEnergy * forestCorrection_eb->GetResponse(vals); 
+      BinIndex = 0;
+    }
+    else {
+      regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forestCorrection_ee->GetResponse(vals);
+      BinIndex = 1;
+    }
+  }
+
+  //print debug
+  if (printDebug) {    
+    if (isEB) {
+      std::cout << "Barrel :";
+      for (uint v=0; v < 61; ++v) std::cout << v << "=" << vals[v] << ", ";
+      std::cout << "\n";
+    }
+    else {
+      std::cout << "Endcap :";
+      for (uint v=0; v < 65; ++v) std::cout << v << "=" << vals[v] << ", ";
+      std::cout << "\n";
+    }
+    std::cout << "BinIndex : " << BinIndex << "\n";
+    std::cout << "SCRawEnergy = " << SCRawEnergy << " : PreShowerOverRaw = " << PreShowerOverRaw << std::endl;
+    std::cout << "regression energy = " << regressionResult << std::endl;
+  }
+  
+
+  // Cleaning up and returning
+  delete[] vals;
+  return regressionResult;
+}
+
+double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithSubClusters(
+                                                                       double SCRawEnergy,
+                                                                       double scEta,
+                                                                       double scPhi,
+                                                                       double R9,
+                                                                       double etawidth,
+                                                                       double phiwidth,
+                                                                       double NClusters,
+                                                                       double HoE,
+                                                                       double rho,
+                                                                       double vertices,
+                                                                       double EtaSeed,
+                                                                       double PhiSeed,
+                                                                       double ESeed,
+                                                                       double E3x3Seed,
+                                                                       double E5x5Seed,
+                                                                       double see,
+                                                                       double spp,
+                                                                       double sep,
+                                                                       double EMaxSeed,
+                                                                       double E2ndSeed,
+                                                                       double ETopSeed,
+                                                                       double EBottomSeed,
+                                                                       double ELeftSeed,
+                                                                       double ERightSeed,
+                                                                       double E2x5MaxSeed,
+                                                                       double E2x5TopSeed,
+                                                                       double E2x5BottomSeed,
+                                                                       double E2x5LeftSeed,
+                                                                       double E2x5RightSeed,
+                                                                       double IEtaSeed,
+                                                                       double IPhiSeed,
+                                                                       double EtaCrySeed,
+                                                                       double PhiCrySeed,
+                                                                       double PreShowerOverRaw, 
+                                                                       double isEcalDriven,
+                                                                       double isEtaGap,
+                                                                       double isPhiGap,
+                                                                       double isDeeGap, 
+                                                                       double ESubs,
+                                                                       double ESub1,
+                                                                       double EtaSub1,
+                                                                       double PhiSub1,
+                                                                       double EMaxSub1,
+                                                                       double E3x3Sub1,
+                                                                       double ESub2,
+                                                                       double EtaSub2,
+                                                                       double PhiSub2,
+                                                                       double EMaxSub2,
+                                                                       double E3x3Sub2,
+                                                                       double ESub3,
+                                                                       double EtaSub3,
+                                                                       double PhiSub3,
+                                                                       double EMaxSub3,
+                                                                       double E3x3Sub3,
+                                                                       double NPshwClusters,
+                                                                       double EPshwSubs,
+                                                                       double EPshwSub1,
+                                                                       double EtaPshwSub1,
+                                                                       double PhiPshwSub1,
+                                                                       double EPshwSub2,
+                                                                       double EtaPshwSub2,
+                                                                       double PhiPshwSub2,
+                                                                       double EPshwSub3,
+                                                                       double EtaPshwSub3,
+                                                                       double PhiPshwSub3,
+                                                                       bool isEB,
+                                                                       bool   printDebug) 
+{
+  // Checking if instance has been initialized
+  if (fIsInitialized == kFALSE) {
+    printf("ElectronEnergyRegressionEvaluate instance not initialized !!!");
+    return 0;
+  }
+
+  // Checking if type is correct
+  if (!(fVersionType == kWithSubCluVar)) {
+    std::cout << "Error: Regression VersionType " << fVersionType << " is not supported to use function regressionValueWithSubClusters.\n";
+    return 0;
+  }
+
+  // Now applying regression according to version and (endcap/barrel)
+  float *vals = (isEB) ? new float[61] : new float[65];
+  if (isEB) {		// Barrel
+    vals[0]  = rho;
+    vals[1] = vertices;
+    vals[2] = isEcalDriven;
+    vals[3] = isEtaGap;
+    vals[4] = isPhiGap;
+    vals[5] = isDeeGap;
+    vals[6]  = SCRawEnergy;
+    vals[7]  = scEta;
+    vals[8]  = scPhi;
+    vals[9]  = R9;
+    vals[10]  = etawidth;
+    vals[11]  = phiwidth;
+    vals[12]  = NClusters;
+    vals[13]  = HoE;
+    vals[14] = EtaSeed - scEta;
+    vals[15] = atan2(sin(PhiSeed-scPhi),cos(PhiSeed-scPhi));
+    vals[16] = ESeed/SCRawEnergy;
+    vals[17] = E3x3Seed/ESeed;
+    vals[18]  = E5x5Seed/SCRawEnergy;
+    vals[19] = E5x5Seed/ESeed;
+    vals[20] = EMaxSeed/ESeed;
+    vals[21] = E2ndSeed/ESeed;
+    vals[22] = ETopSeed/ESeed;
+    vals[23] = EBottomSeed/ESeed;
+    vals[24] = ELeftSeed/ESeed;
+    vals[25] = ERightSeed/ESeed;
+    vals[26] = E2x5MaxSeed/ESeed;
+    vals[27] = E2x5TopSeed/ESeed;
+    vals[28] = E2x5BottomSeed/ESeed;
+    vals[29] = E2x5LeftSeed/ESeed;
+    vals[30] = E2x5RightSeed/ESeed;
+    vals[31] = see;
+    vals[32] = spp;
+    vals[33] = sep;
+    vals[34] = phiwidth/etawidth;
+    vals[35] = (ELeftSeed+ERightSeed==0. ? 0. : (ELeftSeed-ERightSeed)/(ELeftSeed+ERightSeed));
+    vals[36] = (ETopSeed+EBottomSeed==0. ? 0. : (ETopSeed-EBottomSeed)/(ETopSeed+EBottomSeed));
+    vals[37] = ESubs/SCRawEnergy;
+    vals[38] = ESub1/SCRawEnergy;
+    vals[39] = (NClusters<=1 ? 999. : EtaSub1-EtaSeed);
+    vals[40] = (NClusters<=1 ? 999. : atan2(sin(PhiSub1-PhiSeed),cos(PhiSub1-PhiSeed)));
+    vals[41] = (NClusters<=1 ? 0.   : EMaxSub1/ESub1);
+    vals[42] = (NClusters<=1 ? 0.   : E3x3Sub1/ESub1);
+    vals[43] = ESub2/SCRawEnergy;
+    vals[44] = (NClusters<=2 ? 999. : EtaSub2-EtaSeed);
+    vals[45] = (NClusters<=2 ? 999. : atan2(sin(PhiSub2-PhiSeed),cos(PhiSub2-PhiSeed)));
+    vals[46] = (NClusters<=2 ? 0.   : EMaxSub2/ESub2);
+    vals[47] = (NClusters<=2 ? 0.   : E3x3Sub2/ESub2);
+    vals[48] = ESub3/SCRawEnergy;
+    vals[49] = (NClusters<=3 ? 999. : EtaSub3-EtaSeed);
+    vals[50] = (NClusters<=3 ? 999. : atan2(sin(PhiSub3-PhiSeed),cos(PhiSub3-PhiSeed)));
+    vals[51] = (NClusters<=3 ? 0.   : EMaxSub3/ESub3);
+    vals[52] = (NClusters<=3 ? 0.   : E3x3Sub3/ESub3);
+    vals[53] = IEtaSeed;
+    vals[54] = ((int) IEtaSeed)%5;
+    vals[55] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
+    vals[56] = IPhiSeed;
+    vals[57] = ((int) IPhiSeed)%2;
+    vals[58] = ((int) IPhiSeed)%20;
+    vals[59] = EtaCrySeed;
+    vals[60] = PhiCrySeed;
+  }
+  else {	// Endcap
+    vals[0]  = rho;
+    vals[1] = vertices;
+    vals[2] = isEcalDriven;
+    vals[3] = isEtaGap;
+    vals[4] = isPhiGap;
+    vals[5] = isDeeGap;
+    vals[6]  = SCRawEnergy;
+    vals[7]  = scEta;
+    vals[8]  = scPhi;
+    vals[9]  = R9;
+    vals[10]  = etawidth;
+    vals[11]  = phiwidth;
+    vals[12]  = NClusters;
+    vals[13]  = HoE;
+    vals[14] = EtaSeed - scEta;
+    vals[15] = atan2(sin(PhiSeed-scPhi),cos(PhiSeed-scPhi));
+    vals[16] = ESeed/SCRawEnergy;
+    vals[17] = E3x3Seed/ESeed;
+    vals[18]  = E5x5Seed/SCRawEnergy;
+    vals[19] = E5x5Seed/ESeed;
+    vals[20] = EMaxSeed/ESeed;
+    vals[21] = E2ndSeed/ESeed;
+    vals[22] = ETopSeed/ESeed;
+    vals[23] = EBottomSeed/ESeed;
+    vals[24] = ELeftSeed/ESeed;
+    vals[25] = ERightSeed/ESeed;
+    vals[26] = E2x5MaxSeed/ESeed;
+    vals[27] = E2x5TopSeed/ESeed;
+    vals[28] = E2x5BottomSeed/ESeed;
+    vals[29] = E2x5LeftSeed/ESeed;
+    vals[30] = E2x5RightSeed/ESeed;
+    vals[31] = see;
+    vals[32] = spp;
+    vals[33] = sep;
+    vals[34] = phiwidth/etawidth;
+    vals[35] = (ELeftSeed+ERightSeed==0. ? 0. : (ELeftSeed-ERightSeed)/(ELeftSeed+ERightSeed));
+    vals[36] = (ETopSeed+EBottomSeed==0. ? 0. : (ETopSeed-EBottomSeed)/(ETopSeed+EBottomSeed));
+    vals[37] = ESubs/SCRawEnergy;
+    vals[38] = ESub1/SCRawEnergy;
+    vals[39] = (NClusters<=1 ? 999. : EtaSub1-EtaSeed);
+    vals[40] = (NClusters<=1 ? 999. : atan2(sin(PhiSub1-PhiSeed),cos(PhiSub1-PhiSeed)));
+    vals[41] = (NClusters<=1 ? 0.   : EMaxSub1/ESub1);
+    vals[42] = (NClusters<=1 ? 0.   : E3x3Sub1/ESub1);
+    vals[43] = ESub2/SCRawEnergy;
+    vals[44] = (NClusters<=2 ? 999. : EtaSub2-EtaSeed);
+    vals[45] = (NClusters<=2 ? 999. : atan2(sin(PhiSub2-PhiSeed),cos(PhiSub2-PhiSeed)));
+    vals[46] = (NClusters<=2 ? 0.   : EMaxSub2/ESub2);
+    vals[47] = (NClusters<=2 ? 0.   : E3x3Sub2/ESub2);
+    vals[48] = ESub3/SCRawEnergy;
+    vals[49] = (NClusters<=3 ? 999. : EtaSub3-EtaSeed);
+    vals[50] = (NClusters<=3 ? 999. : atan2(sin(PhiSub3-PhiSeed),cos(PhiSub3-PhiSeed)));
+    vals[51] = (NClusters<=3 ? 0.   : EMaxSub3/ESub3);
+    vals[52] = (NClusters<=3 ? 0.   : E3x3Sub3/ESub3);
+    vals[53] = PreShowerOverRaw;
+    vals[54] = NPshwClusters;
+    vals[55] = EPshwSubs/SCRawEnergy;
+    vals[56] = EPshwSub1/SCRawEnergy;
+    vals[57] = (NPshwClusters<=0 ? 999. : EtaPshwSub1-EtaSeed);
+    vals[58] = (NPshwClusters<=0 ? 999. : atan2(sin(PhiPshwSub1-PhiSeed),cos(PhiPshwSub1-PhiSeed)));
+    vals[59] = EPshwSub2/SCRawEnergy;
+    vals[60] = (NPshwClusters<=1 ? 999. : EtaPshwSub2-EtaSeed);
+    vals[61] = (NPshwClusters<=1 ? 999. : atan2(sin(PhiPshwSub2-PhiSeed),cos(PhiPshwSub2-PhiSeed)));
+    vals[62] = EPshwSub3/SCRawEnergy;
+    vals[63] = (NPshwClusters<=2 ? 999. : EtaPshwSub3-EtaSeed);
+    vals[64] = (NPshwClusters<=2 ? 999. : atan2(sin(PhiPshwSub3-PhiSeed),cos(PhiPshwSub3-PhiSeed)));
+
+  }
+
+  // Now evaluating the regression
+  double regressionResult = 0;
+  Int_t BinIndex = -1;
+
+  if (fVersionType == kWithSubCluVar) {
+    if (isEB) { 
+      regressionResult = SCRawEnergy * forestUncertainty_eb->GetResponse(vals); 
+      BinIndex = 0;
+    }
+    else {
+      regressionResult = (SCRawEnergy*(1+PreShowerOverRaw)) * forestUncertainty_ee->GetResponse(vals);
+      BinIndex = 1;
+    }
+  }
+
+  //print debug
+  if (printDebug) {    
+    if (isEB) {
+      std::cout << "Barrel :";
+      for (uint v=0; v < 38; ++v) std::cout << vals[v] << ", ";
+      std::cout << "\n";
+    }
+    else {
+      std::cout << "Endcap :";
+      for (uint v=0; v < 31; ++v) std::cout << vals[v] << ", ";
+      std::cout << "\n";
+    }
+    std::cout << "BinIndex : " << BinIndex << "\n";
+    std::cout << "SCRawEnergy = " << SCRawEnergy << " : PreShowerOverRaw = " << PreShowerOverRaw << std::endl;
+    std::cout << "regression energy uncertainty = " << regressionResult << std::endl;
+  }
+  
 
   // Cleaning up and returning
   delete[] vals;

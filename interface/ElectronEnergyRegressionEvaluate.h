@@ -27,7 +27,8 @@
 #include "CondFormats/EgammaObjects/interface/GBRForest.h"
 #ifndef STANDALONE
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
-#include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
+#include "EgammaAnalysis/ElectronTools/interface/SuperClusterHelper.h"
+//#include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
 #endif
 
 
@@ -41,7 +42,8 @@ class ElectronEnergyRegressionEvaluate{
     kNoTrkVarV1,
     kWithTrkVar,
     kWithTrkVarV1,
-    kWithTrkVarV2
+    kWithTrkVarV2,
+    kWithSubCluVar
   };
 
   void initialize(std::string weightsFile,
@@ -51,15 +53,13 @@ class ElectronEnergyRegressionEvaluate{
                 
 #ifndef STANDALONE
   double calculateRegressionEnergy(const reco::GsfElectron *ele, 
-                                   EcalClusterLazyTools &myEcalCluster, 
-                                   const edm::EventSetup &setup,
-                                   double rho, double nvertices, 
-                                   bool printDebug = false);
+          SuperClusterHelper& mySCHelper, 
+          double rho, double nvertices, 
+          bool printDebug = false);
   double calculateRegressionEnergyUncertainty(const reco::GsfElectron *ele, 
-                                              EcalClusterLazyTools &myEcalCluster, 
-                                              const edm::EventSetup &setup,
-                                              double rho, double nvertices, 
-                                              bool printDebug = false);
+          SuperClusterHelper& mySCHelper,
+          double rho, double nvertices, 
+          bool printDebug = false);
 #endif
 
   // Evaluates regression without tracker variables
@@ -520,6 +520,146 @@ class ElectronEnergyRegressionEvaluate{
                                         bool printDebug = false );
     double regressionUncertaintyWithTrkVarV2( std::vector<double> &inputvars, 			                                                         
                                               bool printDebug = false );
+
+    // Evaluates regression uncertainty with subcluster variables and without track variables
+    double regressionValueWithSubClusters(
+                                 double SCRawEnergy,
+                                 double scEta,
+                                 double scPhi,
+                                 double R9,
+                                 double etawidth,
+                                 double phiwidth,
+                                 double NClusters,
+                                 double HoE,
+                                 double rho,
+                                 double vertices,
+                                 double EtaSeed,
+                                 double PhiSeed,
+                                 double ESeed,
+                                 double E3x3Seed,
+                                 double E5x5Seed,
+                                 double see,
+                                 double spp,
+                                 double sep,
+                                 double EMaxSeed,
+                                 double E2ndSeed,
+                                 double ETopSeed,
+                                 double EBottomSeed,
+                                 double ELeftSeed,
+                                 double ERightSeed,
+                                 double E2x5MaxSeed,
+                                 double E2x5TopSeed,
+                                 double E2x5BottomSeed,
+                                 double E2x5LeftSeed,
+                                 double E2x5RightSeed,
+                                 double IEtaSeed,
+                                 double IPhiSeed,
+                                 double EtaCrySeed,
+                                 double PhiCrySeed,
+                                 double PreShowerOverRaw,
+                                 double isEcalDriven,
+                                 double isEtaGap,
+                                 double isPhiGap,
+                                 double isDeeGap, 
+                                 double ESubs,
+                                 double ESub1,
+                                 double EtaSub1,
+                                 double PhiSub1,
+                                 double EMaxSub1,
+                                 double E3x3Sub1,
+                                 double ESub2,
+                                 double EtaSub2,
+                                 double PhiSub2,
+                                 double EMaxSub2,
+                                 double E3x3Sub2,
+                                 double ESub3,
+                                 double EtaSub3,
+                                 double PhiSub3,
+                                 double EMaxSub3,
+                                 double E3x3Sub3,
+                                 double NPshwClusters,
+                                 double EPshwSubs,
+                                 double EPshwSub1,
+                                 double EtaPshwSub1,
+                                 double PhiPshwSub1,
+                                 double EPshwSub2,
+                                 double EtaPshwSub2,
+                                 double PhiPshwSub2,
+                                 double EPshwSub3,
+                                 double EtaPshwSub3,
+                                 double PhiPshwSub3,
+                                 bool isEB,
+                                 bool printDebug = false);
+
+  // Evaluates regression uncertainty with subcluster variables and without track variables
+  double regressionUncertaintyWithSubClusters(
+                                       double SCRawEnergy,
+                                       double scEta,
+                                       double scPhi,
+                                       double R9,
+                                       double etawidth,
+                                       double phiwidth,
+                                       double NClusters,
+                                       double HoE,
+                                       double rho,
+                                       double vertices,
+                                       double EtaSeed,
+                                       double PhiSeed,
+                                       double ESeed,
+                                       double E3x3Seed,
+                                       double E5x5Seed,
+                                       double see,
+                                       double spp,
+                                       double sep,
+                                       double EMaxSeed,
+                                       double E2ndSeed,
+                                       double ETopSeed,
+                                       double EBottomSeed,
+                                       double ELeftSeed,
+                                       double ERightSeed,
+                                       double E2x5MaxSeed,
+                                       double E2x5TopSeed,
+                                       double E2x5BottomSeed,
+                                       double E2x5LeftSeed,
+                                       double E2x5RightSeed,
+                                       double IEtaSeed,
+                                       double IPhiSeed,
+                                       double EtaCrySeed,
+                                       double PhiCrySeed,
+                                       double PreShowerOverRaw,
+                                       double isEcalDriven,
+                                       double isEtaGap,
+                                       double isPhiGap,
+                                       double isDeeGap, 
+                                       double ESubs,
+                                       double ESub1,
+                                       double EtaSub1,
+                                       double PhiSub1,
+                                       double EMaxSub1,
+                                       double E3x3Sub1,
+                                       double ESub2,
+                                       double EtaSub2,
+                                       double PhiSub2,
+                                       double EMaxSub2,
+                                       double E3x3Sub2,
+                                       double ESub3,
+                                       double EtaSub3,
+                                       double PhiSub3,
+                                       double EMaxSub3,
+                                       double E3x3Sub3,
+                                       double NPshwClusters,
+                                       double EPshwSubs,
+                                       double EPshwSub1,
+                                       double EtaPshwSub1,
+                                       double PhiPshwSub1,
+                                       double EPshwSub2,
+                                       double EtaPshwSub2,
+                                       double PhiPshwSub2,
+                                       double EPshwSub3,
+                                       double EtaPshwSub3,
+                                       double PhiPshwSub3,
+                                       bool isEB,
+                                       bool printDebug = false);
 
 
  private:
