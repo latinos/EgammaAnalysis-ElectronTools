@@ -155,7 +155,7 @@ bool ElectronIdMVAProducer::filter(edm::Event& iEvent, const edm::EventSetup& iS
           mvaVal = mvaID_->mvaValue( *egIter, *pv,thebuilder,lazyTools, verbose_);
 	  }
 	  if(NoIP_){
-	    mvaVal = mvaID_->mvaValue( *egIter, *pv, _Rho,thebuilder,lazyTools, verbose_);
+	    mvaVal = mvaID_->mvaValue( *egIter, *pv, _Rho,/*thebuilder,*/lazyTools, verbose_);
 	  }
 	  
 	  values.push_back( mvaVal ); 
