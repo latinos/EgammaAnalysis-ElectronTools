@@ -20,7 +20,7 @@ mvaTrigV0 = cms.EDFilter("ElectronIdMVAProducer",
                          )
 
 mvaTrigNoIPV0 = cms.EDFilter("ElectronIdMVAProducer",
-                             verbose = cms.untracked.bool(True),
+                             verbose = cms.untracked.bool(False),
                              vertexTag = cms.InputTag('offlinePrimaryVertices'),
                              electronTag = cms.InputTag('gsfElectrons'),
                              reducedEBRecHitCollection = cms.InputTag('reducedEcalRecHitsEB'),

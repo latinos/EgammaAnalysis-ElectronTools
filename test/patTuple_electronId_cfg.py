@@ -18,7 +18,7 @@ from PhysicsTools.PatAlgos.patTemplate_cfg import *
 # removeSpecificPATObjects(process, ['Electrons', 'Muons', 'Taus'])
 
 process.load('EgammaAnalysis.ElectronTools.electronIdMVAProducer_cfi')
-process.mvaID = cms.Sequence(  process.mvaTrigV0 + process.mvaNonTrigV0 )
+process.mvaID = cms.Sequence(  process.mvaTrigV0 +process.mvaTrigNoIPV0 + process.mvaNonTrigV0 )
 
 #Electron ID
 process.patElectrons.electronIDSources = cms.PSet(
@@ -52,9 +52,9 @@ process.out.outputCommands +=[
 #
 #   process.GlobalTag.globaltag =  ...    ##  (according to https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideFrontierConditions)
 #                                         ##
-#   process.source.fileNames = [          ##
-#    '/store/relval/CMSSW_3_5_0_pre1/RelValTTbar/GEN-SIM-RECO/STARTUP3X_V14-v1/0006/14920B0A-0DE8-DE11-B138-002618943926.root'
-#   ]                                     ##  (e.g. 'file:AOD.root')
+process.source.fileNames = [          ##
+    '/store/mc/Summer12_DR53X/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/AODSIM/PU_S10_START53_V7A-v1/0001/FE4B9392-D8D3-E111-8789-0025B3E05D8C.root'
+    ]                                     ##  (e.g. 'file:AOD.root')
 #                                         ##
 #   process.maxEvents.input = ...         ##  (e.g. -1 to run on all events)
 #                                         ##
