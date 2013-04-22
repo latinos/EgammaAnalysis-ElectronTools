@@ -689,7 +689,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVar(
     vals[31] = IPhiSeed;
     vals[32] = ((int) IEtaSeed)%5;
     vals[33] = ((int) IPhiSeed)%2;
-    vals[34] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
+    vals[34] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
     vals[35] = ((int) IPhiSeed)%20;
     vals[36] = EtaCrySeed;
     vals[37] = PhiCrySeed;
@@ -852,7 +852,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyNoTrkVar(
     vals[31] = IPhiSeed;
     vals[32] = ((int) IEtaSeed)%5;
     vals[33] = ((int) IPhiSeed)%2;
-    vals[34] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
+    vals[34] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
     vals[35] = ((int) IPhiSeed)%20;
     vals[36] = EtaCrySeed;
     vals[37] = PhiCrySeed;
@@ -1020,7 +1020,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueNoTrkVarV1(
     vals[32] = IPhiSeed;
     vals[33] = ((int) IEtaSeed)%5;
     vals[34] = ((int) IPhiSeed)%2;
-    vals[35] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
+    vals[35] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
     vals[36] = ((int) IPhiSeed)%20;
     vals[37] = EtaCrySeed;
     vals[38] = PhiCrySeed;
@@ -1186,7 +1186,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyNoTrkVarV1(
     vals[32] = IPhiSeed;
     vals[33] = ((int) IEtaSeed)%5;
     vals[34] = ((int) IPhiSeed)%2;
-    vals[35] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
+    vals[35] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
     vals[36] = ((int) IPhiSeed)%20;
     vals[37] = EtaCrySeed;
     vals[38] = PhiCrySeed;
@@ -1361,7 +1361,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVar(
     vals[36] = IPhiSeed;
     vals[37] = ((int) IEtaSeed)%5;
     vals[38] = ((int) IPhiSeed)%2;
-    vals[39] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
+    vals[39] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
     vals[40] = ((int) IPhiSeed)%20;
     vals[41] = EtaCrySeed;
     vals[42] = PhiCrySeed;
@@ -1534,7 +1534,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVar(
     vals[36] = IPhiSeed;
     vals[37] = ((int) IEtaSeed)%5;
     vals[38] = ((int) IPhiSeed)%2;
-    vals[39] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
+    vals[39] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
     vals[40] = ((int) IPhiSeed)%20;
     vals[41] = EtaCrySeed;
     vals[42] = PhiCrySeed;
@@ -1710,7 +1710,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVarV1(
     vals[39] = IPhiSeed;
     vals[40] = ((int) IEtaSeed)%5;
     vals[41] = ((int) IPhiSeed)%2;
-    vals[42] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
+    vals[42] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
     vals[43] = ((int) IPhiSeed)%20;
     vals[44] = EtaCrySeed;
     vals[45] = PhiCrySeed;
@@ -1889,7 +1889,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVarV1(
     vals[39] = IPhiSeed;
     vals[40] = ((int) IEtaSeed)%5;
     vals[41] = ((int) IPhiSeed)%2;
-    vals[42] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
+    vals[42] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
     vals[43] = ((int) IPhiSeed)%20;
     vals[44] = EtaCrySeed;
     vals[45] = PhiCrySeed;
@@ -2073,7 +2073,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVarV1(std::vector
     vals[39] = IPhiSeed;
     vals[40] = ((int) IEtaSeed)%5;
     vals[41] = ((int) IPhiSeed)%2;
-    vals[42] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
+    vals[42] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
     vals[43] = ((int) IPhiSeed)%20;
     vals[44] = EtaCrySeed;
     vals[45] = PhiCrySeed;
@@ -2257,7 +2257,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVarV1(std::
     vals[39] = IPhiSeed;
     vals[40] = ((int) IEtaSeed)%5;
     vals[41] = ((int) IPhiSeed)%2;
-    vals[42] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
+    vals[42] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
     vals[43] = ((int) IPhiSeed)%20;
     vals[44] = EtaCrySeed;
     vals[45] = PhiCrySeed;
@@ -2449,7 +2449,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVarV2(
     vals[46] = IPhiSeed;
     vals[47] = ((int) IEtaSeed)%5;
     vals[48] = ((int) IPhiSeed)%2;
-    vals[49] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
+    vals[49] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
     vals[50] = ((int) IPhiSeed)%20;
     vals[51] = EtaCrySeed;
     vals[52] = PhiCrySeed;
@@ -2649,7 +2649,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVarV2(
     vals[46] = IPhiSeed;
     vals[47] = ((int) IEtaSeed)%5;
     vals[48] = ((int) IPhiSeed)%2;
-    vals[49] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
+    vals[49] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
     vals[50] = ((int) IPhiSeed)%20;
     vals[51] = EtaCrySeed;
     vals[52] = PhiCrySeed;
@@ -2853,7 +2853,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithTrkVarV2(std::vector
     vals[46] = IPhiSeed;
     vals[47] = ((int) IEtaSeed)%5;
     vals[48] = ((int) IPhiSeed)%2;
-    vals[49] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
+    vals[49] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
     vals[50] = ((int) IPhiSeed)%20;
     vals[51] = EtaCrySeed;
     vals[52] = PhiCrySeed;
@@ -3057,7 +3057,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithTrkVarV2(std::
     vals[46] = IPhiSeed;
     vals[47] = ((int) IEtaSeed)%5;
     vals[48] = ((int) IPhiSeed)%2;
-    vals[49] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
+    vals[49] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
     vals[50] = ((int) IPhiSeed)%20;
     vals[51] = EtaCrySeed;
     vals[52] = PhiCrySeed;
@@ -3284,7 +3284,7 @@ double ElectronEnergyRegressionEvaluate::regressionValueWithSubClusters(
     vals[52] = (NClusters<=3 ? 0.   : E3x3Sub3/ESub3);
     vals[53] = IEtaSeed;
     vals[54] = ((int) IEtaSeed)%5;
-    vals[55] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
+    vals[55] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
     vals[56] = IPhiSeed;
     vals[57] = ((int) IPhiSeed)%2;
     vals[58] = ((int) IPhiSeed)%20;
@@ -3537,7 +3537,7 @@ double ElectronEnergyRegressionEvaluate::regressionUncertaintyWithSubClusters(
     vals[52] = (NClusters<=3 ? 0.   : E3x3Sub3/ESub3);
     vals[53] = IEtaSeed;
     vals[54] = ((int) IEtaSeed)%5;
-    vals[55] = (fabs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (fabs(IEtaSeed)>25)*(((int) (IEtaSeed-25*fabs(IEtaSeed)/IEtaSeed))%20);
+    vals[55] = (abs(IEtaSeed)<=25)*(((int)IEtaSeed)%25) + (abs(IEtaSeed)>25)*(((int) (IEtaSeed-25*abs(IEtaSeed)/IEtaSeed))%20);
     vals[56] = IPhiSeed;
     vals[57] = ((int) IPhiSeed)%2;
     vals[58] = ((int) IPhiSeed)%20;

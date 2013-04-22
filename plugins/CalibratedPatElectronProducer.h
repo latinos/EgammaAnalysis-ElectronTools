@@ -10,6 +10,12 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 
+#include "EgammaAnalysis/ElectronTools/interface/SimpleElectron.h"
+#include "EgammaAnalysis/ElectronTools/interface/ElectronEPcombinator.h"
+#include "EgammaAnalysis/ElectronTools/interface/ElectronEnergyCalibrator.h"
+#include "EgammaAnalysis/ElectronTools/interface/EpCombinationTool.h"
+
+
 class CalibratedPatElectronProducer: public edm::EDProducer 
  {
   public:
@@ -27,9 +33,16 @@ class CalibratedPatElectronProducer: public edm::EDProducer
     bool isAOD ;
     bool isMC ;
     bool updateEnergyError ;
-    int applyCorrections ;
+    int correctionsType ;
+    int combinationType ;
     bool verbose ;
     bool synchronization ;
+    double lumiRatio;
+    std::string combinationRegressionInputPath;
+
+    ElectronEnergyCalibrator *theEnCorrector;
+    EpCombinationTool *myEpCombinationTool;
+    ElectronEPcombinator *myCombinator;
     
  } ;
 

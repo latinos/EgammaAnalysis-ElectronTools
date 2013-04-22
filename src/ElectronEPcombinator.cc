@@ -7,8 +7,6 @@ void ElectronEPcombinator::combine(SimpleElectron & electron){
 	electron_ = electron;
 	computeEPcombination();
 	electron.setCombinedMomentum(combinedMomentum_);
-	std::cout<<" CombinedMomentum_ = "<< combinedMomentum_ << std::endl;
-	std::cout<<" Saved Combined Momentum_ = " << electron.getCombinedMomentum() << std::endl;
 	electron.setCombinedMomentumError(combinedMomentumError_);
 }
 
@@ -27,14 +25,9 @@ void ElectronEPcombinator::computeEPcombination(){
   trackerMomentumError_ = electron_.getTrackerMomentumError();
   elClass_ = electron_.getElClass();
 
-  std::cout<<" Energy = "<< scEnergy_ << std::endl;
-  std::cout<<" Energy Error = " << scEnergyError_ << std::endl;
-
-
   combinedMomentum_ = scEnergy_; // initial
   combinedMomentumError_ = 999.;
   
-  std::cout<<"Combinatior initialized"<<std::endl;
   // first check for large errors
  
   if (trackerMomentumError_/trackerMomentum_ > 0.5 && scEnergyError_/scEnergy_ <= 0.5) {
@@ -62,42 +55,34 @@ void ElectronEPcombinator::computeEPcombination(){
 			     (scEnergy_*trackerMomentumError_/trackerMomentum_/trackerMomentum_)*
 			     (scEnergy_*trackerMomentumError_/trackerMomentum_/trackerMomentum_));
 
-    bool eleIsNotInCombination = false ;
-     if ( (eOverP  > 1 + 2.5*errorEOverP) || (eOverP  < 1 - 2.5*errorEOverP) || (eOverP < 0.8) || (eOverP > 1.3) )
-      { eleIsNotInCombination = true ; }
-     if (eleIsNotInCombination)
-      {
-       if (eOverP > 1)
-        { combinedMomentum_ = scEnergy_ ; combinedMomentumError_ = scEnergyError_ ; }
-       else
-        {
-         if (elClass_==0) // == reco::GsfElectron::GOLDEN)
-          { combinedMomentum_ = scEnergy_; combinedMomentumError_ = scEnergyError_; }
-         if (elClass_ == 1) //reco::GsfElectron::BIGBREM)
-          {
-           if (scEnergy_<36)
-            { combinedMomentum_ = trackerMomentum_ ; combinedMomentumError_ = trackerMomentumError_ ; }
-           else
-            { combinedMomentum_ = scEnergy_ ; combinedMomentumError_ = scEnergyError_ ; }
-          }
-         if (elClass_==2) // == reco::GsfElectron::BADTRACK)
-          { combinedMomentum_ = scEnergy_; combinedMomentumError_ = scEnergyError_ ; }
-         if (elClass_ == 3) //reco::GsfElectron::SHOWERING)
-          {
-           if (scEnergy_<30)
-            { combinedMomentum_ = trackerMomentum_ ; combinedMomentumError_ = trackerMomentumError_; }
-           else
-            { combinedMomentum_ = scEnergy_; combinedMomentumError_ = scEnergyError_;}
-          }
-         if (elClass_ == 4) //reco::GsfElectron::GAP)
-          {
-           if (scEnergy_<60)
-            { combinedMomentum_ = trackerMomentum_ ; combinedMomentumError_ = trackerMomentumError_ ; }
-           else
-            { combinedMomentum_ = scEnergy_; combinedMomentumError_ = scEnergyError_ ; }
-          }
-        }
-      }
+    //old combination
+     if ( eOverP  > 1 + 2.5*errorEOverP )
+       {
+ 	combinedMomentum_ = scEnergy_; combinedMomentumError_ = scEnergyError_;
+ 	if ((elClass_==0) && electron_.isEB() && (eOverP<1.15))
+ 	  {
+ 	    if (scEnergy_<15) {combinedMomentum_ = trackerMomentum_ ; combinedMomentumError_ = trackerMomentumError_;}
+ 	  }
+       }
+     else if ( eOverP < 1 - 2.5*errorEOverP )
+       {
+ 	combinedMomentum_ = scEnergy_; combinedMomentumError_ = scEnergyError_;
+ 	if (elClass_==3)
+ 	  {
+ 	    if (electron_.isEB())
+ 	      {
+ 		if(scEnergy_<18) {combinedMomentum_ = trackerMomentum_; combinedMomentumError_ = trackerMomentumError_;}
+ 	      }
+ 	    else 
+ 	      {
+ 		if(scEnergy_<13) {combinedMomentum_ = trackerMomentum_; combinedMomentumError_ = trackerMomentumError_;}
+ 	      }
+ 	  }
+ 	else if (elClass_==4)
+ 	  {
+ 	    if(scEnergy_<60) {combinedMomentum_ = trackerMomentum_; combinedMomentumError_ = trackerMomentumError_;}
+ 	  }
+       }
  
      else
       {
@@ -106,7 +91,6 @@ void ElectronEPcombinator::computeEPcombination(){
          (1/scEnergyError_/scEnergyError_ + 1/trackerMomentumError_/trackerMomentumError_);
        float combinedMomentum_Variance = 1 / (1/scEnergyError_/scEnergyError_ + 1/trackerMomentumError_/trackerMomentumError_);
        combinedMomentumError_ = sqrt(combinedMomentum_Variance);
-  std::cout<<"Combined momentum "<<combinedMomentum_<<" Combined momentum error "<<combinedMomentumError_<<std::endl;
       }
   } 
 

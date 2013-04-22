@@ -14,6 +14,9 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/Framework/interface/EDFilter.h"
 
+#include "FWCore/Framework/interface/ESHandle.h"
+#include "Geometry/CaloEventSetup/interface/CaloTopologyRecord.h"
+#include "Geometry/Records/interface/CaloGeometryRecord.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
@@ -45,6 +48,11 @@ private:
 
   std::string nameEnergyReg_;
   std::string nameEnergyErrorReg_;
+
+  bool geomInitialized_;
+
+  const CaloTopology* ecalTopology_;
+  const CaloGeometry* caloGeometry_;
   
   edm::InputTag recHitCollectionEB_;
   edm::InputTag recHitCollectionEE_;
@@ -75,11 +83,14 @@ ElectronRegressionEnergyProducer::ElectronRegressionEnergyProducer(const edm::Pa
   //set regression type
   ElectronEnergyRegressionEvaluate::ElectronEnergyRegressionType type = ElectronEnergyRegressionEvaluate::kNoTrkVar;
   if (energyRegressionType_ == 1) type = ElectronEnergyRegressionEvaluate::kNoTrkVar;
-  else if (energyRegressionType_ == 2) type = ElectronEnergyRegressionEvaluate::kWithTrkVarV1;
-  else if (energyRegressionType_ == 3) type = ElectronEnergyRegressionEvaluate::kWithTrkVarV2;
+  else if (energyRegressionType_ == 2) type = ElectronEnergyRegressionEvaluate::kWithSubCluVar;
+  else if (energyRegressionType_ == 3) type = ElectronEnergyRegressionEvaluate::kWithTrkVarV1;
+  else if (energyRegressionType_ == 4) type = ElectronEnergyRegressionEvaluate::kWithTrkVarV2;
 
   //load weights and initialize
   regressionEvaluator->initialize(regressionInputFile_.c_str(),type);
+
+  geomInitialized_ = false;
 
 }
 
@@ -93,6 +104,17 @@ ElectronRegressionEnergyProducer::~ElectronRegressionEnergyProducer()
 bool ElectronRegressionEnergyProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
   assert(regressionEvaluator->isInitialized());
+
+  if (!geomInitialized_) {
+    edm::ESHandle<CaloTopology> theCaloTopology;
+    iSetup.get<CaloTopologyRecord>().get(theCaloTopology);
+    ecalTopology_ = & (*theCaloTopology);
+    
+    edm::ESHandle<CaloGeometry> theCaloGeometry;
+    iSetup.get<CaloGeometryRecord>().get(theCaloGeometry); 
+    caloGeometry_ = & (*theCaloGeometry);
+    geomInitialized_ = true;
+  }
   
   std::auto_ptr<edm::ValueMap<double> > regrEnergyMap(new edm::ValueMap<double>() );
   edm::ValueMap<double>::Filler energyFiller(*regrEnergyMap);
@@ -108,13 +130,14 @@ bool ElectronRegressionEnergyProducer::filter(edm::Event& iEvent, const edm::Eve
   std::vector<double> energyErrorValues;
   energyValues.reserve(egCollection->size());
   energyErrorValues.reserve(egCollection->size());
-
+  //
   //**************************************************************************
-  //Tool for Cluster shapes
+  // Rechits
   //**************************************************************************
-  EcalClusterLazyTools lazyTools(iEvent, iSetup, 
-                                 recHitCollectionEB_, 
-                                 recHitCollectionEE_);  
+  edm::Handle< EcalRecHitCollection > pEBRecHits;
+  edm::Handle< EcalRecHitCollection > pEERecHits;
+  iEvent.getByLabel( recHitCollectionEB_, pEBRecHits );
+  iEvent.getByLabel( recHitCollectionEE_, pEERecHits );
 
   //**************************************************************************
   //Get Number of Vertices
@@ -149,15 +172,21 @@ bool ElectronRegressionEnergyProducer::filter(edm::Event& iEvent, const edm::Eve
   for ( reco::GsfElectronCollection::const_iterator egIter = egCandidates.begin(); 
         egIter != egCandidates.end(); ++egIter) {
 
+    const EcalRecHitCollection * recHits=0;
+    if(egIter->isEB()) 
+        recHits = pEBRecHits.product();
+    else 
+        recHits = pEERecHits.product();
+
+    SuperClusterHelper mySCHelper(&(*egIter),recHits,ecalTopology_,caloGeometry_);
+
     double energy=regressionEvaluator->calculateRegressionEnergy(&(*egIter),
-                                                          lazyTools,
-                                                          iSetup,
+                                                          mySCHelper,
                                                           rho,nvertices,
                                                           printDebug_);
     
     double error=regressionEvaluator->calculateRegressionEnergyUncertainty(&(*egIter),
-                                                                    lazyTools,
-                                                                    iSetup,
+                                                                    mySCHelper,
                                                                     rho,nvertices,
                                                                     printDebug_);
 
