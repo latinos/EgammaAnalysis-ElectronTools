@@ -79,7 +79,7 @@ CalibratedPatElectronProducer::CalibratedPatElectronProducer( const edm::Paramet
   
 	  case 0:
 		  break;
-  	  case 1: pathToDataCorr = "../data/scalesMoriond.csv"; 
+  	  case 1: pathToDataCorr = "../data/scales2011.csv"; 
   		  if (verbose) {std::cout<<"You choose regression 1 scale corrections"<<std::endl;}
   		  break;
   	  case 2: throw cms::Exception("CalibratedgsfElectronProducer|ConfigError")<<"You choose regression 2 scale corrections. They are not implemented yet." ;

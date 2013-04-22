@@ -53,7 +53,7 @@ process.eleRegressionEnergy.rhoCollection = cms.InputTag('kt6PFJets:rho')
 process.out = cms.OutputModule("PoolOutputModule",
                                outputCommands = cms.untracked.vstring('drop *',
                                                                       'keep *_*_*_ExREG'),
-                               fileName = cms.untracked.string('electrons-AOD.root')
+                               fileName = cms.untracked.string('electrons-AOD-2011scales.root')
                                                               )
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 
