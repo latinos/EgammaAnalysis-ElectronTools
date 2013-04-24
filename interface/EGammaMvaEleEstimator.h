@@ -20,6 +20,7 @@
 #define EGammaMvaEleEstimator_H
 
 #ifndef STANDALONE
+#include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
@@ -74,6 +75,10 @@ class EGammaMvaEleEstimator{
 		      //const TransientTrackBuilder& transientTrackBuilder,
                       EcalClusterLazyTools myEcalCluster,
                       bool printDebug = kFALSE);
+
+    Double_t mvaValue(const pat::Electron& ele, 
+		      double rho,
+		      bool printDebug = kFALSE);
     
     Double_t isoMvaValue(const reco::GsfElectron& ele, 
                          const reco::Vertex& vertex, 
