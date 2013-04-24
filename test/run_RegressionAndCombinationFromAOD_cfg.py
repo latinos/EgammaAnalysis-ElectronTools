@@ -22,11 +22,10 @@ process.calibratedElectrons.isMC = cms.bool(True)
 process.calibratedElectrons.inputDataset = cms.string("Fall11")
 process.calibratedElectrons.updateEnergyError = cms.bool(True)
 process.calibratedElectrons.correctionsType = cms.int32(1)
-process.calibratedElectrons.combinationType = cms.int32(1)
+process.calibratedElectrons.combinationType = cms.int32(3)
 process.calibratedElectrons.lumiRatio = cms.double(1.0)
 process.calibratedElectrons.verbose = cms.bool(True)
 process.calibratedElectrons.synchronization = cms.bool(True)
-#process.calibratedElectrons.combinationRegressionInputPath = cms.string("../data/GBR_EGclusters_PlusPshw_Pt5-ted_pt_5-300_Cut50_PtSlope50_Significance_5_results.root")
 
 process.load('RecoJets.Configuration.RecoPFJets_cff')
 process.kt6PFJets = process.kt6PFJets.clone( Rho_EtaMax = cms.double(2.5), Ghost_EtaMax = cms.double(2.5) )
@@ -53,7 +52,7 @@ process.eleRegressionEnergy.rhoCollection = cms.InputTag('kt6PFJets:rho')
 process.out = cms.OutputModule("PoolOutputModule",
                                outputCommands = cms.untracked.vstring('drop *',
                                                                       'keep *_*_*_ExREG'),
-                               fileName = cms.untracked.string('electrons-AOD-2011scales.root')
+                               fileName = cms.untracked.string('electrons.root')
                                                               )
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 

@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 eleRegressionEnergy = cms.EDProducer("RegressionEnergyPatElectronProducer",
                                    debug = cms.untracked.bool(False),
-                                   inputElectronsTag = cms.InputTag('cleanPatElectrons'),
+                                   inputElectronsTag = cms.InputTag('patElectronsWithTrigger'),
                                    #inputElectronsTag = cms.InputTag('gsfElectrons'),
                                      # inputCollectionType (0: GsfElectron, 1 :PATElectron)
                                    inputCollectionType = cms.uint32(1),
@@ -11,10 +11,10 @@ eleRegressionEnergy = cms.EDProducer("RegressionEnergyPatElectronProducer",
                                      # produce ValueMaps. Should be true for GsfElectrons otherwise this producer doest nothing. Keep it to false for PAT
                                    produceValueMaps = cms.bool(False),
                                    #regressionInputFile = cms.string("EgammaAnalysis/ElectronTools/data/eleEnergyRegWeights_V1.root"),
-                                   regressionInputFile = cms.string("EgammaAnalysis/ElectronTools/data/eleEnergyReg2011Weights_V1.root"),
+                                   regressionInputFile = cms.string("EgammaAnalysis/ElectronTools/data/eleEnergyReg2011Weights_WithSubClusters_VApr23.root"),
                                      ## Regression type (1: ECAL regression w/o subclusters 2: ECAL regression w/ subclusters)
-                                   #energyRegressionType = cms.uint32(1),
                                    energyRegressionType = cms.uint32(2),
+                                   #energyRegressionType = cms.uint32(1),
 
                                    rhoCollection = cms.InputTag('kt6PFJets:rho:RECO'),
                                    vertexCollection = cms.InputTag('offlinePrimaryVertices'),
