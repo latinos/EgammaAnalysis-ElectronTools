@@ -28,7 +28,7 @@ process.patConversions = cms.EDProducer("PATConversionProducer",
     # this should be your last selected electron collection name since currently index is used to match with electron later. We can fix this using reference pointer. ,
 )
 
-process.mvaTrigV0PAT = cms.EDFilter("ElectronPATIdMVAProducer",
+process.mvaTrigV0PAT = cms.EDProducer("ElectronPATIdMVAProducer",
                                     verbose = cms.untracked.bool(False),
                                     electronTag = cms.InputTag('cleanPatElectrons'),
                                     method = cms.string("BDT"),

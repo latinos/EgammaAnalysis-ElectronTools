@@ -3,7 +3,7 @@
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDFilter.h"
+#include "FWCore/Framework/interface/EDProducer.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -23,13 +23,13 @@
 
 using namespace std;
 using namespace reco;
-class ElectronPATIdMVAProducer : public edm::EDFilter {
+class ElectronPATIdMVAProducer : public edm::EDProducer {
 	public:
 		explicit ElectronPATIdMVAProducer(const edm::ParameterSet&);
-		~ElectronPATIdMVAProducer();
+		virtual ~ElectronPATIdMVAProducer();
 
 	private:
-		virtual bool filter(edm::Event&, const edm::EventSetup&);
+		virtual void produce(edm::Event&, const edm::EventSetup&);
 
 		// ----------member data ---------------------------
   bool verbose_;
@@ -62,7 +62,7 @@ ElectronPATIdMVAProducer::ElectronPATIdMVAProducer(const edm::ParameterSet& iCon
 	std::vector<string> fpMvaWeightFiles = iConfig.getParameter<std::vector<std::string> >("mvaWeightFile");
 	eventrho = iConfig.getParameter<edm::InputTag>("Rho");
 
-        produces<edm::ValueMap<float> >("mvaTrigNoIP");
+        produces<edm::ValueMap<float> >();
 
         mvaID_ = new EGammaMvaEleEstimator();
  
@@ -100,7 +100,7 @@ ElectronPATIdMVAProducer::~ElectronPATIdMVAProducer()
 //
 
 // ------------ method called on each new Event  ------------
-bool ElectronPATIdMVAProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+void ElectronPATIdMVAProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 	using namespace edm;
 
         std::auto_ptr<edm::ValueMap<float> > out(new edm::ValueMap<float>() );
@@ -141,9 +141,9 @@ bool ElectronPATIdMVAProducer::filter(edm::Event& iEvent, const edm::EventSetup&
         filler.insert(egCollection, values.begin(), values.end() );
 	filler.fill();
 
-	iEvent.put(out,"mvaTrigNoIP");
+	iEvent.put(out);
 
-	return true;
+   
 }
 
 //define this as a plug-in
