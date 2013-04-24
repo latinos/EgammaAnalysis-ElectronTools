@@ -117,7 +117,7 @@ void ElectronPATIdMVAProducer::produce(edm::Event& iEvent, const edm::EventSetup
 
 	_Rho=0;
 	edm::Handle<double> rhoPtr;
-	const edm::InputTag eventrho("kt6PFJets", "rho");
+	//const edm::InputTag eventrho("kt6PFJets", "rho");
 	iEvent.getByLabel(eventrho,rhoPtr);
 	_Rho=*rhoPtr;
 
