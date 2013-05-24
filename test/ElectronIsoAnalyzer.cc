@@ -206,7 +206,8 @@ ElectronIsoAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     
     float eff_area_phnh = ElectronEffectiveArea::GetElectronEffectiveArea(effAreaGammaPlusNeutralHad_, abseta, effAreaTarget_);
     
-    double myRho = max<double>(0.d,rhoIso);
+    // It was double myRho = max<double>(0.d,rhoIso); It seems that c++'99 compiler is linked to CMSSW_4_4_X and hence can't compile such statement
+    double myRho = max<double>(0.0,rhoIso);
     
     float myPfIsoPuCorr = charged + max<float>(0.f, (photon+neutral) - eff_area_phnh*myRho);
 
