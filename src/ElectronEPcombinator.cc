@@ -55,34 +55,42 @@ void ElectronEPcombinator::computeEPcombination(){
 			     (scEnergy_*trackerMomentumError_/trackerMomentum_/trackerMomentum_)*
 			     (scEnergy_*trackerMomentumError_/trackerMomentum_/trackerMomentum_));
 
-    //old combination
-     if ( eOverP  > 1 + 2.5*errorEOverP )
-       {
- 	combinedMomentum_ = scEnergy_; combinedMomentumError_ = scEnergyError_;
- 	if ((elClass_==0) && electron_.isEB() && (eOverP<1.15))
- 	  {
- 	    if (scEnergy_<15) {combinedMomentum_ = trackerMomentum_ ; combinedMomentumError_ = trackerMomentumError_;}
- 	  }
-       }
-     else if ( eOverP < 1 - 2.5*errorEOverP )
-       {
- 	combinedMomentum_ = scEnergy_; combinedMomentumError_ = scEnergyError_;
- 	if (elClass_==3)
- 	  {
- 	    if (electron_.isEB())
- 	      {
- 		if(scEnergy_<18) {combinedMomentum_ = trackerMomentum_; combinedMomentumError_ = trackerMomentumError_;}
- 	      }
- 	    else 
- 	      {
- 		if(scEnergy_<13) {combinedMomentum_ = trackerMomentum_; combinedMomentumError_ = trackerMomentumError_;}
- 	      }
- 	  }
- 	else if (elClass_==4)
- 	  {
- 	    if(scEnergy_<60) {combinedMomentum_ = trackerMomentum_; combinedMomentumError_ = trackerMomentumError_;}
- 	  }
-       }
+    bool eleIsNotInCombination = false ;
+     if ( (eOverP  > 1 + 2.5*errorEOverP) || (eOverP  < 1 - 2.5*errorEOverP) || (eOverP < 0.8) || (eOverP > 1.3) )
+      { eleIsNotInCombination = true ; }
+     if (eleIsNotInCombination)
+      {
+       if (eOverP > 1)
+        { combinedMomentum_ = scEnergy_ ; combinedMomentumError_ = scEnergyError_ ; }
+       else
+        {
+         if (elClass_==0) // == reco::GsfElectron::GOLDEN)
+          { combinedMomentum_ = scEnergy_; combinedMomentumError_ = scEnergyError_; }
+         if (elClass_ == 1) //reco::GsfElectron::BIGBREM)
+          {
+           if (scEnergy_<36)
+            { combinedMomentum_ = trackerMomentum_ ; combinedMomentumError_ = trackerMomentumError_ ; }
+           else
+            { combinedMomentum_ = scEnergy_ ; combinedMomentumError_ = scEnergyError_ ; }
+          }
+         if (elClass_==2) // == reco::GsfElectron::BADTRACK)
+          { combinedMomentum_ = scEnergy_; combinedMomentumError_ = scEnergyError_ ; }
+         if (elClass_ == 3) //reco::GsfElectron::SHOWERING)
+          {
+           if (scEnergy_<30)
+            { combinedMomentum_ = trackerMomentum_ ; combinedMomentumError_ = trackerMomentumError_; }
+           else
+            { combinedMomentum_ = scEnergy_; combinedMomentumError_ = scEnergyError_;}
+          }
+         if (elClass_ == 4) //reco::GsfElectron::GAP)
+          {
+           if (scEnergy_<60)
+            { combinedMomentum_ = trackerMomentum_ ; combinedMomentumError_ = trackerMomentumError_ ; }
+           else
+            { combinedMomentum_ = scEnergy_; combinedMomentumError_ = scEnergyError_ ; }
+          }
+        }
+      }
  
      else
       {

@@ -123,7 +123,9 @@ void ElectronEnergyCalibrator::calibrate(SimpleElectron &electron)
   		  newEnergy_ = electron.getRegEnergy();
   		  newEnergyError_ = electron.getRegEnergyError();
 		  break;
-	  case 2: if(verbose_) {std::cout<<"[ElectronEnergyCalibrator] Regression type 2 corrections are not yet implemented"<<std::endl;}
+	  case 2: if(verbose_) {std::cout<<"[ElectronEnergyCalibrator] Using regression energy with subclusters"<<std::endl;}
+  		  newEnergy_ = electron.getRegEnergy();
+  		  newEnergyError_ = electron.getRegEnergyError();
 		  break;
 	  case 3: if (verbose_) {std::cout<<"[ElectronEnergyCalibrator] Using standard ecal energy for calibration"<<std::endl;}
   		  newEnergy_ = electron.getSCEnergy();
@@ -167,6 +169,19 @@ void ElectronEnergyCalibrator::calibrate(SimpleElectron &electron)
    break;
 
    case 2: std::cout<<"Regression type 2 corrections are not yet implemented"<<std::endl; break;
+   // Implementation of the MC smearing for regression energy with subclusters
+   if (dataset_=="Fall11"||dataset_=="Jan16ReReco") { // values from https://hypernews.cern.ch/HyperNews/CMS/get/higgs2g/634.html, consistant with Jan16ReReco corrections
+
+      if (isEB && fabs(eta)<1 && r9<0.94) dsigMC = 0.0099;
+      if (isEB && fabs(eta)<1 && r9>=0.94) dsigMC = 0.0068;
+      if (isEB && fabs(eta)>=1 && r9<0.94) dsigMC = 0.0200;
+      if (isEB && fabs(eta)>=1 && r9>=0.94) dsigMC = 0.0139;
+      if (!isEB && fabs(eta)<2 && r9<0.94) dsigMC = 0.0243;
+      if (!isEB && fabs(eta)<2 && r9>=0.94) dsigMC = 0.0258;
+      if (!isEB && fabs(eta)>=2 && r9<0.94) dsigMC = 0.0276;
+      if (!isEB && fabs(eta)>=2 && r9>=0.94) dsigMC = 0.0288;   
+ 
+    }
    case 3: // standard SC energy scale corrections implementation
       if (dataset_=="Summer11"||dataset_=="ReReco") { // values from https://indico.cern.ch/conferenceDisplay.py?confId=146386
       if (isEB && fabs(eta)<1 && r9<0.94) dsigMC = 0.01;

@@ -21,7 +21,7 @@ process.load("EgammaAnalysis.ElectronTools.calibratedPatElectrons_cfi")
 process.calibratedPatElectrons.isMC = cms.bool(False)
 process.calibratedPatElectrons.inputDataset = cms.string("Jan16ReReco")
 process.calibratedPatElectrons.updateEnergyError = cms.bool(True)
-process.calibratedPatElectrons.correctionsType = cms.int32(1)
+process.calibratedPatElectrons.correctionsType = cms.int32(2)
 process.calibratedPatElectrons.combinationType = cms.int32(3)
 process.calibratedPatElectrons.lumiRatio = cms.double(1.0)
 process.calibratedPatElectrons.verbose = cms.bool(True)
@@ -33,7 +33,8 @@ process.maxEvents = cms.untracked.PSet(
 
 
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('/store/cmst3/user/cmgtools/CMG/DoubleElectron/Run2011A-16Jan2012-v1/AOD/V5/PAT_CMG_V5_9_0/cmgTuple_305.root')
+    #fileNames = cms.untracked.vstring('/store/cmst3/user/cmgtools/CMG/DoubleElectron/Run2011A-16Jan2012-v1/AOD/V5/PAT_CMG_V5_9_0/cmgTuple_305.root')
+    fileNames = cms.untracked.vstring('/store/cernproduction/hzz4l/CMG/DoubleElectron/Run2011A-16Jan2012-v1/AOD/V5/PAT_CMG_V5_15_0/cmgTuple_999.root')
     )
 
 process.load('EgammaAnalysis.ElectronTools.electronRegressionEnergyProducer_cfi')
