@@ -260,7 +260,8 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergy(const reco::G
               ele->charge(),
               fmin(ele->eSuperClusterOverP(), 20.0),
               ele->trackMomentumError(),
-              ele->correctedEcalEnergyError(),
+              ele->ecalEnergyError(),
+              //ele->correctedEcalEnergyError(),
               ele->classification(),                                    
               printDebug
                   );
@@ -307,7 +308,8 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergy(const reco::G
               ele->charge(),
               fmin(ele->eSuperClusterOverP(), 20.0),
               ele->trackMomentumError(),
-              ele->correctedEcalEnergyError(),
+              ele->ecalEnergyError(),
+              //ele->correctedEcalEnergyError(),
               ele->classification(),     
               fmin(fabs(ele->deltaEtaSuperClusterTrackAtVtx()), 0.6),
               ele->deltaPhiSuperClusterTrackAtVtx(),
@@ -535,7 +537,8 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergyUncertainty(co
               ele->charge(),
               fmin(ele->eSuperClusterOverP(), 20.0),
               ele->trackMomentumError(),
-              ele->correctedEcalEnergyError(),
+              ele->ecalEnergyError(),
+              //ele->correctedEcalEnergyError(),
               ele->classification(),                                    
               printDebug
                   );
@@ -582,7 +585,8 @@ double ElectronEnergyRegressionEvaluate::calculateRegressionEnergyUncertainty(co
               ele->charge(),
               fmin(ele->eSuperClusterOverP(), 20.0),
               ele->trackMomentumError(),
-              ele->correctedEcalEnergyError(),
+              ele->ecalEnergyError(),
+              //ele->correctedEcalEnergyError(),
               ele->classification(),     
               fmin(fabs(ele->deltaEtaSuperClusterTrackAtVtx()), 0.6),
               ele->deltaPhiSuperClusterTrackAtVtx(),
