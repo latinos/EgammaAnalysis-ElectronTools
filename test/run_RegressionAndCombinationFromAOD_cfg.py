@@ -50,7 +50,7 @@ process.eleRegressionEnergy.inputElectronsTag = cms.InputTag('gsfElectrons')
 process.eleRegressionEnergy.inputCollectionType = cms.uint32(0)
 process.eleRegressionEnergy.useRecHitCollections = cms.bool(True)
 process.eleRegressionEnergy.produceValueMaps = cms.bool(True)
-process.eleRegressionEnergy.regressionInputFile = cms.string("EgammaAnalysis/ElectronTools/data/eleEnergyRegWeights_WithSubClusters_VApr15.root")
+process.eleRegressionEnergy.regressionInputFile = cms.string("EgammaAnalysis/ElectronTools/data/eleEnergyReg2011Weights_WithSubClusters_VMay28.root")
 process.eleRegressionEnergy.energyRegressionType = cms.uint32(2)
 
 process.out = cms.OutputModule("PoolOutputModule",

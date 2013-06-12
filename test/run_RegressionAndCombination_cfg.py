@@ -40,7 +40,7 @@ process.source = cms.Source("PoolSource",
 process.load('EgammaAnalysis.ElectronTools.electronRegressionEnergyProducer_cfi')
 process.eleRegressionEnergy.inputElectronsTag = cms.InputTag('patElectronsWithTrigger')
 process.eleRegressionEnergy.rhoCollection = cms.InputTag('kt6PFJets:rho')
-process.eleRegressionEnergy.energyRegressionType = cms.uint32(1)
+process.eleRegressionEnergy.energyRegressionType = cms.uint32(2)
 #process.eleRegressionEnergy.inputCollectionType = cms.uint32(0)
 #process.eleRegressionEnergy.useRecHitCollections = cms.bool(True)
 

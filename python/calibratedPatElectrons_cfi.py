@@ -24,7 +24,12 @@ calibratedPatElectrons = cms.EDProducer("CalibratedPatElectronProducer",
  
     updateEnergyError = cms.bool(True),
 
-    correctionsType = cms.int32(1),
+    # define the type of the scale corrections
+    correctionsType = cms.int32(2),
+    # Apply or not the linearity correction on data
+    # Can only be applied with combinationType = 3
+    applyLinearityCorrection = cms.bool(True),
+    # define the type of the E-p combination
     combinationType = cms.int32(3),
     
     lumiRatio = cms.double(0.0),
@@ -36,8 +41,9 @@ calibratedPatElectrons = cms.EDProducer("CalibratedPatElectronProducer",
     # Summer11 means summer11 MC..
     #inputDataset = cms.string("ReReco"),
     inputDataset = cms.string("Jan16ReReco"),
-    combinationRegressionInputPath = cms.string("EgammaAnalysis/ElectronTools/data/eleEnergyReg2011Weights_WithSubClusters_VApr23.root"),
-    scaleCorrectionsInputPath = cms.string("EgammaAnalysis/ElectronTools/data/scales2011NewReg-May2013.csv")
+    combinationRegressionInputPath = cms.string("EgammaAnalysis/ElectronTools/data/eleEnergyReg2011Weights_WithSubClusters_VMay28.root"),
+    scaleCorrectionsInputPath = cms.string("EgammaAnalysis/ElectronTools/data/scales2011NewReg-May2013.csv"),
+    linearityCorrectionsInputPath = cms.string("EgammaAnalysis/ElectronTools/data/linearityNewReg2011-May2013.csv")
     
 )
 
