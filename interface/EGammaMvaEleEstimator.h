@@ -120,6 +120,7 @@ class EGammaMvaEleEstimator{
                          Bool_t printDebug = kFALSE );
 #endif
   
+    // for kTrig algo
     Double_t mvaValue(Double_t fbrem, 
                       Double_t kfchi2,
                       Int_t    kfhits,
@@ -144,6 +145,7 @@ class EGammaMvaEleEstimator{
                       Double_t pt,
                       Bool_t printDebug = kFALSE );
  
+    // for kTrigNoIP algo
     Double_t mvaValue(Double_t fbrem, 
                       Double_t kfchi2,
                       Int_t    kfhits,
@@ -167,6 +169,7 @@ class EGammaMvaEleEstimator{
                       Double_t pt,
                       Bool_t printDebug = kFALSE );
 
+    // for kNonTrig algo
     Double_t mvaValue(Double_t fbrem, 
                       Double_t kfchi2,
                       Int_t    kfhits,

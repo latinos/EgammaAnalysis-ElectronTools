@@ -426,6 +426,7 @@ UInt_t EGammaMvaEleEstimator::GetMVABin( double eta, double pt) const {
 
 
 //--------------------------------------------------------------------------------------------------
+// for kTrig algorithm
 Double_t EGammaMvaEleEstimator::mvaValue(Double_t fbrem, 
 					Double_t kfchi2,
 					Int_t    kfhits,
@@ -456,6 +457,10 @@ Double_t EGammaMvaEleEstimator::mvaValue(Double_t fbrem,
   if (!fisInitialized) { 
     std::cout << "Error: EGammaMvaEleEstimator not properly initialized.\n"; 
     return -9999;
+  }
+
+  if (fMVAType != EGammaMvaEleEstimator::kTrig) {
+    std::cout << "Error: This method should be called for kTrig MVA only" << endl;
   }
 
   fMVAVar_fbrem           = fbrem; 
@@ -526,8 +531,9 @@ Double_t EGammaMvaEleEstimator::mvaValue(Double_t fbrem,
 
   return mva;
 }
-//--------------------------------------------------------------------------------------------------------
 
+//--------------------------------------------------------------------------------------------------------
+// for kTrigNoIP algorithm
 Double_t EGammaMvaEleEstimator::mvaValue(Double_t fbrem, 
 					 Double_t kfchi2,
 					 Int_t    kfhits,
@@ -554,6 +560,10 @@ Double_t EGammaMvaEleEstimator::mvaValue(Double_t fbrem,
   if (!fisInitialized) { 
     std::cout << "Error: EGammaMvaEleEstimator not properly initialized.\n"; 
     return -9999;
+  }
+
+  if (fMVAType != EGammaMvaEleEstimator::kTrigNoIP) {
+    std::cout << "Error: This method should be called for kTrigNoIP MVA only" << endl;
   }
 
   fMVAVar_fbrem           = fbrem; 
@@ -623,6 +633,7 @@ Double_t EGammaMvaEleEstimator::mvaValue(Double_t fbrem,
 }
 
 //--------------------------------------------------------------------------------------------------
+// for kNonTrig algorithm
 Double_t EGammaMvaEleEstimator::mvaValue(Double_t fbrem, 
 					Double_t kfchi2,
 					Int_t    kfhits,
@@ -651,6 +662,10 @@ Double_t EGammaMvaEleEstimator::mvaValue(Double_t fbrem,
   if (!fisInitialized) { 
     std::cout << "Error: EGammaMvaEleEstimator not properly initialized.\n"; 
     return -9999;
+  }
+
+  if (fMVAType != EGammaMvaEleEstimator::kNonTrig) {
+    std::cout << "Error: This method should be called for kNonTrig MVA only" << endl;
   }
 
   fMVAVar_fbrem           = fbrem; 
