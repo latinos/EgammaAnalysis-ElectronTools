@@ -961,6 +961,7 @@ Double_t EGammaMvaEleEstimator::isoMvaValue(Double_t Pt,
 
 //--------------------------------------------------------------------------------------------------
 
+// for kTrig and kNonTrig algorithm
 Double_t EGammaMvaEleEstimator::mvaValue(const reco::GsfElectron& ele, 
 					const reco::Vertex& vertex, 
 					const TransientTrackBuilder& transientTrackBuilder,					
@@ -970,6 +971,10 @@ Double_t EGammaMvaEleEstimator::mvaValue(const reco::GsfElectron& ele,
   if (!fisInitialized) { 
     std::cout << "Error: EGammaMvaEleEstimator not properly initialized.\n"; 
     return -9999;
+  }
+
+  if ( (fMVAType != EGammaMvaEleEstimator::kTrig) && (fMVAType != EGammaMvaEleEstimator::kNonTrig )) {
+    std::cout << "Error: This method should be called for kTrig MVA only" << endl;
   }
   
   bool validKF= false; 
@@ -1088,6 +1093,7 @@ Double_t EGammaMvaEleEstimator::mvaValue(const reco::GsfElectron& ele,
 }
 
 
+// for kTrigNoIP algorithm
 Double_t EGammaMvaEleEstimator::mvaValue(const reco::GsfElectron& ele, 
 					 const reco::Vertex& vertex, 
 					 double rho,
@@ -1100,6 +1106,10 @@ Double_t EGammaMvaEleEstimator::mvaValue(const reco::GsfElectron& ele,
     return -9999;
   }
   
+  if (fMVAType != EGammaMvaEleEstimator::kTrigNoIP) {
+    std::cout << "Error: This method should be called for kTrigNoIP MVA only" << endl;
+  }
+
   bool validKF= false; 
   reco::TrackRef myTrackRef = ele.closestCtfTrackRef();
   validKF = (myTrackRef.isAvailable());
@@ -1191,7 +1201,6 @@ Double_t EGammaMvaEleEstimator::mvaValue(const reco::GsfElectron& ele,
 
   return mva;
 }
-
 
 
 
