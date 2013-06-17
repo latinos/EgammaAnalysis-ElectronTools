@@ -461,6 +461,7 @@ Double_t EGammaMvaEleEstimator::mvaValue(Double_t fbrem,
 
   if (fMVAType != EGammaMvaEleEstimator::kTrig) {
     std::cout << "Error: This method should be called for kTrig MVA only" << endl;
+    return -9999;
   }
 
   fMVAVar_fbrem           = fbrem; 
@@ -564,6 +565,7 @@ Double_t EGammaMvaEleEstimator::mvaValue(Double_t fbrem,
 
   if (fMVAType != EGammaMvaEleEstimator::kTrigNoIP) {
     std::cout << "Error: This method should be called for kTrigNoIP MVA only" << endl;
+    return -9999;
   }
 
   fMVAVar_fbrem           = fbrem; 
@@ -666,6 +668,7 @@ Double_t EGammaMvaEleEstimator::mvaValue(Double_t fbrem,
 
   if (fMVAType != EGammaMvaEleEstimator::kNonTrig) {
     std::cout << "Error: This method should be called for kNonTrig MVA only" << endl;
+    return -9999;
   }
 
   fMVAVar_fbrem           = fbrem; 
@@ -975,6 +978,7 @@ Double_t EGammaMvaEleEstimator::mvaValue(const reco::GsfElectron& ele,
 
   if ( (fMVAType != EGammaMvaEleEstimator::kTrig) && (fMVAType != EGammaMvaEleEstimator::kNonTrig )) {
     std::cout << "Error: This method should be called for kTrig or kNonTrig MVA only" << endl;
+    return -9999;
   }
   
   bool validKF= false; 
@@ -1108,6 +1112,7 @@ Double_t EGammaMvaEleEstimator::mvaValue(const reco::GsfElectron& ele,
   
   if (fMVAType != EGammaMvaEleEstimator::kTrigNoIP) {
     std::cout << "Error: This method should be called for kTrigNoIP MVA only" << endl;
+    return -9999;
   }
 
   bool validKF= false; 
@@ -1216,6 +1221,7 @@ Double_t EGammaMvaEleEstimator::mvaValue(const pat::Electron& ele,
 
   if ( (fMVAType != EGammaMvaEleEstimator::kTrigNoIP) && (fMVAType != EGammaMvaEleEstimator::kNonTrig )) {
     std::cout << "Error: This method should be called for kTrig or kNonTrig MVA only" << endl;
+    return -9999;
   }
   
 
