@@ -974,7 +974,7 @@ Double_t EGammaMvaEleEstimator::mvaValue(const reco::GsfElectron& ele,
   }
 
   if ( (fMVAType != EGammaMvaEleEstimator::kTrig) && (fMVAType != EGammaMvaEleEstimator::kNonTrig )) {
-    std::cout << "Error: This method should be called for kTrig MVA only" << endl;
+    std::cout << "Error: This method should be called for kTrig or kNonTrig MVA only" << endl;
   }
   
   bool validKF= false; 
