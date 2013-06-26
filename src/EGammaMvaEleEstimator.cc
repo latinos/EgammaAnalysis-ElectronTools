@@ -1220,7 +1220,7 @@ Double_t EGammaMvaEleEstimator::mvaValue(const pat::Electron& ele,
   }
 
   if ( (fMVAType != EGammaMvaEleEstimator::kTrigNoIP) ) {
-    std::cout << "Error: This method should be called for kTrig or kNonTrig MVA only" << endl;
+    std::cout << "Error: This method should be called for kTrigNoIP mva only" << endl;
     return -9999;
   }
   
