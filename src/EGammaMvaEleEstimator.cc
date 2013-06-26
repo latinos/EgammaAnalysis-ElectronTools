@@ -1208,8 +1208,8 @@ Double_t EGammaMvaEleEstimator::mvaValue(const reco::GsfElectron& ele,
 }
 
 
-// for kTrigNoIP or kNonTrig algorithm only.
-// code for kTrig still to be implemented
+// for kTrigNoIP algorithm only.
+// code for kTrig and kNonTrig still to be implemented
 Double_t EGammaMvaEleEstimator::mvaValue(const pat::Electron& ele, 
 					 double rho,
 					 bool printDebug) {
@@ -1219,7 +1219,7 @@ Double_t EGammaMvaEleEstimator::mvaValue(const pat::Electron& ele,
     return -9999;
   }
 
-  if ( (fMVAType != EGammaMvaEleEstimator::kTrigNoIP) && (fMVAType != EGammaMvaEleEstimator::kNonTrig )) {
+  if ( (fMVAType != EGammaMvaEleEstimator::kTrigNoIP) ) {
     std::cout << "Error: This method should be called for kTrig or kNonTrig MVA only" << endl;
     return -9999;
   }
