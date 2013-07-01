@@ -1284,6 +1284,10 @@ Double_t EGammaMvaEleEstimator::mvaValue(const pat::Electron& ele,
     }
   }
 
+  // Spectators
+  fMVAVar_eta             =  ele.superCluster()->eta();
+  fMVAVar_pt              =  ele.pt();
+
   // evaluate
   bindVariables();
   Double_t mva = -9999;
